@@ -14,7 +14,7 @@
         <v-btn text to="/login">Login</v-btn>
       </v-app-bar>
     </header>
-    <body class="bg-grey lighten-4">
+    <body class="bg-grey-darken-4">
       <v-main>
         <v-container fluid>
           <router-view />
