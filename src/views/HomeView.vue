@@ -42,24 +42,26 @@
       </v-row>
     </v-col>
     <v-col cols="4">
-      <p>よかったこと</p>
-      <v-textarea
-        variant="outlined"
-        name="successes"
-        placeholder="よかったことを記入してください"
-        rows="10"
-        auto-grow
-        outlined
-      ></v-textarea>
-      <p>改善点</p>
-      <v-textarea
-        variant="outlined"
-        name="failures"
-        placeholder="改善点を記入してください"
-        rows="10"
-        auto-grow
-        outlined
-      ></v-textarea>
+       <p>よかったこと</p>
+    <v-textarea
+      v-model="successes"
+      variant="outlined"
+      name="successes"
+      placeholder="よかったことを記入してください"
+      rows="10"
+      auto-grow
+      outlined
+    ></v-textarea>
+    <p>改善点</p>
+    <v-textarea
+      v-model="failures"
+      variant="outlined"
+      name="failures"
+      placeholder="改善点を記入してください"
+      rows="10"
+      auto-grow
+      outlined
+    ></v-textarea>
       <v-btn @click="save" class="text-black ma-5"> 一時保存 </v-btn>
       <v-btn @click="submit" class="text-black ma-5"> 送信 </v-btn>
     </v-col>
@@ -83,9 +85,10 @@
       </v-table>
       <p>AIコメント</p>
       <v-textarea
+        v-model="assessment"
         bg-color="grey-darken-3"
         variant="outlined"
-        name="successes"
+        name="assessment"
         placeholder="AIがコメントを記入します"
         rows="10"
         auto-grow
@@ -97,10 +100,15 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import axios from 'axios'
 
 // 時刻入力用
 const startTime = ref("09:00");
 const endTime = ref("18:00");
+const successes = ref('');
+const failures = ref('');
+const assessment = ref('');
+const item = ref({});
 
 // タスク内容
 const tasks = ref([]);
@@ -157,4 +165,84 @@ const efData = ref([
   { EF_item: "計画性", score: 1, total_score: 7 },
   { EF_item: "柔軟性", score: 1, total_score: 12 },
 ]);
+
+
+async function submit() {
+  // 送信処理を実装
+
+    //responseにAPIからのデータが返ってくる
+   const check = {        
+        startTime: startTime.value,
+        endTime: endTime.value,
+        successes: successes.value,
+        failures: failures.value,
+        tasks: tasks.value,
+      }
+
+    console.log(check);
+    
+    // const response = await axios.post(
+    //   'endpoint/{useID}',
+    //   {        
+    //     startTime: startTime.value,
+    //     endTime: endTime.value,
+    //     successes: successes.value,
+    //     failures: failures.value,
+    //     tasks: tasks.value,
+    //   }
+    // )
+
+    // ダミーデータ
+    const response = {
+       data: {
+            items: [
+              { EF_item: "自己管理", score: 10, total_score: 10 },
+              { EF_item: "注意力", score: -10, total_score: 8 },
+              { EF_item: "感情制御", score: -10, total_score: 9 },
+              { EF_item: "計画性", score: 10, total_score: 7 },
+              { EF_item: "柔軟性", score: 10, total_score: 12 }
+            ],
+            assessment: "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。"
+      }
+      }
+
+    efData.value = response.data.items;
+    assessment.value = response.data.assessment;
+  
+}
+
+async function save() {
+  // 一時保存処理を実装
+  try {
+    // const response = await axios.post(
+    //   'endpoint/{useID}save',
+    //   {
+    //     startTime: startTime.value,
+    //     endTime: endTime.value,
+    //     successes: successes.value,
+    //     failures: failures.value,
+    //     tasks: tasks.value
+    //   }
+    // )
+
+    // ダミーデータ
+    response2 = {
+      data: {
+    items: [
+      { EF_item: "自己管理", score: 1, total_score: 10 },
+      { EF_item: "注意力", score: -1, total_score: 8 },
+      { EF_item: "感情制御", score: -1, total_score: 9 },
+      { EF_item: "計画性", score: 1, total_score: 7 },
+      { EF_item: "柔軟性", score: 1, total_score: 12 }
+    ],
+        assessment: "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。"
+      }
+    }
+
+  }catch (error) {
+    console.error("Error saving data:", error);
+  }
+}
+
+
 </script>
