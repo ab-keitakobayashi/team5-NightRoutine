@@ -1,5 +1,18 @@
 # 開発
-npm run dev     
+npm run dev 
+
+# saaya用git hubのうれしいコマンド
+
+git branch　：
+　今どこのブランチにいるかわかる
+git checkout -b 任意のブランチ名 origin/main：
+　ブランチ切れる
+git push -u origin 任意のブランチ名：
+　プッシュできる
+ 
+＊mainでいじらないこと
+＊ちゃんとコメントアウトもコメントもしようね
+ 
 
 # Vue 3 + TypeScript + Vite
 
