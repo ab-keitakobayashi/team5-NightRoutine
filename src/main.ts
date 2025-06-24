@@ -9,6 +9,8 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 //下記の赤線は無視
 import "vuetify/styles";
+import VCalendar from "v-calendar";
+import "v-calendar/style.css";
 
 const vuetify = createVuetify({
   components,
@@ -17,5 +19,8 @@ const vuetify = createVuetify({
 
 const app = createApp(App);
 app.use(vuetify);
+app.use(VCalendar, {
+  componentPrefix: "vc",
+});
 app.use(router);
 app.mount("#app");

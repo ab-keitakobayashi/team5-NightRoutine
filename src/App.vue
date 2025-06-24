@@ -2,7 +2,8 @@
   <v-app>
     <header>
       <v-app-bar app color="black" dark>
-        <v-btn text to="/">Home</v-btn>
+        <v-btn text to="/">振り返り記入</v-btn>
+        <v-btn text to="/reports/calender">カレンダー</v-btn>
         <v-spacer></v-spacer>
         <v-toolbar-title
           class="text-center"
@@ -14,13 +15,11 @@
         <v-btn text to="/login">Login</v-btn>
       </v-app-bar>
     </header>
-    <body class="bg-grey-darken-4">
-      <v-main>
-        <v-container fluid>
-          <router-view />
-        </v-container>
-      </v-main>
-    </body>
+    <v-main class="bg-grey-darken-4">
+      <v-container fluid>
+        <router-view />
+      </v-container>
+    </v-main>
   </v-app>
 </template>
 
