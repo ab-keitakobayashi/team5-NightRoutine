@@ -1,6 +1,7 @@
 # 開発
 
 npm install
+npm install axios
 npm run dev
 
 # saaya用git hubのうれしいコマンド
