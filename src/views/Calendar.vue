@@ -4,22 +4,22 @@
       <vc-calendar expanded :attributes="attributes" />
     </v-col>
     <v-col cols="6" class="text-center">
-      <v-row>
-        <v-col cols="12">
-          <v-card>
-            <v-card-item>
-              <v-card-title>Lv.</v-card-title>
-
-              <v-card-subtitle>This is a card subtitle</v-card-subtitle>
-            </v-card-item>
-
-            <v-card-text>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi,
-              ratione debitis quis est labore voluptatibus!
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+      <v-card class="pa-5">
+        <v-row>
+          <v-col cols="6">
+            <v-img src="https://picsum.photos/200/300" alt="" class="fluid" />
+          </v-col>
+          <v-col cols="6">
+            <v-card-title class="text-h3 px-5 text-wrap">Lv.1</v-card-title>
+            <v-card-text class="text-h5">選択したEF</v-card-text>
+            <v-card-text class="text-h5">選択したEF</v-card-text>
+            <v-card-text class="text-h5">選択したEF</v-card-text>
+            <v-card-text class="text-h5">選択したEF</v-card-text>
+            <v-card-text class="text-h5">選択したEF</v-card-text>
+            <v-card-text class="text-h5">次のレベルまで</v-card-text>
+          </v-col>
+        </v-row>
+      </v-card>
     </v-col>
   </v-row>
 </template>
@@ -27,7 +27,7 @@
 <script setup lang="ts">
 const attributes = [
   {
-    key: "holidays",
+    key: "successes",
     dates: ["2025-07-20", "2025-08-11"],
     customData: { type: "holiday" },
     highlight: {
@@ -38,7 +38,7 @@ const attributes = [
     },
   },
   {
-    key: "events",
+    key: "failures",
     dates: ["2025-07-25"],
     customData: { type: "event" },
     highlight: {
