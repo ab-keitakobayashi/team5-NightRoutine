@@ -1,5 +1,7 @@
 # 開発
-npm run dev 
+
+npm install
+npm run dev
 
 # saaya用git hubのうれしいコマンド
 
