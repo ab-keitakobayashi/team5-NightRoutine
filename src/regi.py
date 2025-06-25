@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, FastAPI
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from util.db_connect import get_db  # DBセッション取得関数
-from models.db_models import User  # Userモデル
+from db_connect import get_db  # DBセッション取得関数
+from models import User  # Userモデル
 
 #router = APIRouter() #後で外す
 
@@ -36,7 +36,7 @@ class UserResiResponse(BaseModel):
     ef_item_id5: int
 
 # ④itemを追加（サンプル実装済み）
-@router.post("/user/regi", response_model=UserResiResponse)
+@app.post("/user/regi", response_model=UserResiResponse) #あとでappをrouterに変更
 def create_item(user: UserResiRequest, db_session: Session = Depends(get_db)): # 2⃣
     db_user = User(user_name=user.name, user_mailAddress=user.mailAddress,
                    class_id=user.class_id, period=user.period, avatar_id=1, #アバターIDの初期値
