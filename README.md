@@ -30,5 +30,6 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 
 ## RDS
 
+エンドポイント：aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com
 user: admin
 pass: fy26admin
