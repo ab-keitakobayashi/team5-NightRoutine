@@ -27,11 +27,11 @@ class User(Base):
     avatar_id = Column(Integer, nullable=False)
     enemy_id = Column(Integer, nullable=False)
     enemy_hp = Column(Integer, nullable=False)
-    ef_item_id1 = Column(Integer, nullable=False)
-    ef_item_id2 = Column(Integer, nullable=False)
-    ef_item_id3 = Column(Integer, nullable=False)
-    ef_item_id4 = Column(Integer, nullable=False)
-    ef_item_id5 = Column(Integer, nullable=False)
+    ef_item_id_1 = Column(Integer, nullable=False)
+    ef_item_id_2 = Column(Integer, nullable=False)
+    ef_item_id_3 = Column(Integer, nullable=False)
+    ef_item_id_4 = Column(Integer, nullable=False)
+    ef_item_id_5 = Column(Integer, nullable=False)
 
 class Reports(Base):
     __tablename__ = "reports"
