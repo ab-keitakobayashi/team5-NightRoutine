@@ -17,7 +17,7 @@ Base = declarative_base()
 # モデル定義
 # データベースのテーブルを定義するためのモデルクラスを作成します。
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "testusers"
 
     user_id = Column(Integer, primary_key=True, index=True)
     user_name = Column(String, nullable=False)
