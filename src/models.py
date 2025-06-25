@@ -33,21 +33,26 @@ class User(Base):
     ef_item_id_4 = Column(Integer, nullable=False)
     ef_item_id_5 = Column(Integer, nullable=False)
 
-class Reports(Base):
+class ReportsModel(Base):
     __tablename__ = "reports"
 
+    user_id = Column(Integer, primary_key=True, index=True)
     report_id = Column(Integer, primary_key=True, index=True)
-    startTime = Column(String, nullable=False)
-    endTime = Column(String, nullable=False)
-    successes = Column(String, nullable=False)
-    failures = Column(String, nullable=False)
-    tasks = Column(String, nullable=False)
+    write_date = Column(DateTime, default=datetime, nullable=False)
+    is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み   
+
+class tasksModel(Base):
+    __tablename__ = "tasks"
+
+    task_id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, primary_key=True, index=True)
+    startTime = Column(DateTime, nullable=False)
+    tasks_description = Column(String, nullable=False)
 
 
 
 # Pydanticモデル
 # データのバリデーションとシリアライズを行うためのモデル]
-
 
 # Post
 
@@ -57,6 +62,29 @@ class UserUpdateRequest(BaseModel):
     class_id: int
     period: int
     efitem_id: int
+
+
+
+
+class Report(BaseModel):
+
+    report_id: int
+    startTime : str
+    endTime : str
+    successes: str
+    failures : str
+    tasks : str
+
+
+class ReportResponse(BaseModel):
+
+    user_id: int
+    report_id: int
+    startTime : str
+    endTime : str
+    successes: str
+    failures : str
+    tasks : str
 
 class UserResiRequest(BaseModel):
     name: str
