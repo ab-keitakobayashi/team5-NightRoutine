@@ -36,3 +36,20 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 name: admin
 password:fy26admin
 (as same as the handson's docs)
+
+for test
+table name: testusers
+colunm:
+user_id INT PRIMARY KEY AUTO_INCREMENT,
+user_name varchar(250),
+user_mailAddress varchar(250),
+class_id int,
+period date,
+avater_id int,
+enemy_id int,
+enemy_HP int,
+EF_item_id_1 int,
+EF_item_id_2 int,
+EF_item_id_3 int,
+EF_item_id_4 int,
+EF_item_id_5 int
