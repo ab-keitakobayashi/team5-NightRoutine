@@ -43,7 +43,7 @@ colunm:
 user_id INT PRIMARY KEY AUTO_INCREMENT,
 user_name varchar(250),
 user_mailAddress varchar(250),
-class_id int,
+class_id int,oython
 period date,
 avater_id int,
 enemy_id int,
@@ -53,3 +53,33 @@ EF_item_id_2 int,
 EF_item_id_3 int,
 EF_item_id_4 int,
 EF_item_id_5 int
+
+ここから情報
+import pymysql
+import os
+
+def main_handler(event, context): # RDS 接続情報
+host = "aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com" # RDS のエンドポイント
+user = "admin" # RDS 作成時に設定したユーザー名
+password = "fy26admin" # そのユーザーのパスワード
+db = "NightRoutine" # 作成したデータベース名
+
+    # RDSに接続
+    connection = pymysql.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=db,
+        connect_timeout=5
+    )
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT NOW();")
+            result = cursor.fetchone()
+        return {
+            'statusCode': 200,
+            'body': f'現在時刻: {result[0]}'
+        }
+    finally:
+        connection.close()
