@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, Session
 DB接続設定とモデル定義
 """
 # DB接続設定
-DATABASE_URL = "mysql+pymysql://admin:fy26admin@fy26-training-handson-db.cxok2mc8wgeq.ap-northeast-1.rds.amazonaws.com:3306/handson" ##URL
+DATABASE_URL = "aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com" ##URL
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
