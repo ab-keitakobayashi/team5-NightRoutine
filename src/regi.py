@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, FastAPI
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from ...util.db_connect import get_db  # DBセッション取得関数
-from ...models.db_models import User  # Userモデル
+from util.db_connect import get_db  # DBセッション取得関数
+from models.db_models import User  # Userモデル
 
-router = APIRouter()
+#router = APIRouter() #後で外す
+
 app = FastAPI()
 
 class UserResiRequest(BaseModel):
