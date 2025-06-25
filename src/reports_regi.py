@@ -1,7 +1,7 @@
 from fastapi import FastAPI,APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from models import Reports ,Report , ReportResponse# Userモデル
-
+from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
@@ -32,8 +32,8 @@ def get_db_session():
 
 
 # # ④itemを追加（サンプル実装済み）
-@app.post("/report/regi/{user_id}" , response_model=ReportResponse)
-def registor_report(user_id: int, report: Report, db_session: Session = Depends(get_db_session)): 
+@app.post("/report/regi/{user_id}/{day}", response_model=ReportResponse)
+def registor_report(user_id: int, day: datetime, report: Report, db_session: Session = Depends(get_db_session)): 
 #     # report = Reports(
 #     #     startTime=0.0,
 #     #     endTime=0.0,
