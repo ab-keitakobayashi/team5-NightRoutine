@@ -8,8 +8,7 @@ import os
 load_dotenv()
 
 # 環境変数からDB URLを取得
-database_url = os.environ.get("aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com")
-
+database_url = "aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com"
 
 # エンジンを作成
 engine = create_engine(database_url)
