@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from ..db import get_db  # DBセッション取得関数
-from ..models import User  # Userモデル
+from db_connect import engine #DBセッション取得関数
+from db_connect import get_db
+from models import User# Userモデル
 
 router = APIRouter()
 
@@ -13,9 +14,9 @@ class UserUpdateRequest(BaseModel):
     period: int
     efitem_id: int
 
-@router.put("/user/update")
-def update_user_profile(request: UserUpdateRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == request.user_id).first()
+@router.put("/user/update/{user_id}", response_model=dict)
+def update_user_profile(user_id: int, request: UserUpdateRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.class_id = request.class_id
