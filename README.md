@@ -6,6 +6,8 @@ npm install axios
 
 npm run dev
 
+npm install v-calendar@next @popperjs/core
+
 # saaya用git hubのうれしいコマンド
 
 git branch　：
