@@ -27,11 +27,11 @@ class User(Base):
     avatar_id = Column(Integer, nullable=False)
     enemy_id = Column(Integer, nullable=False)
     enemy_hp = Column(Integer, nullable=False)
-    ef_item_id1 = Column(Integer, nullable=False)
-    ef_item_id2 = Column(Integer, nullable=False)
-    ef_item_id3 = Column(Integer, nullable=False)
-    ef_item_id4 = Column(Integer, nullable=False)
-    ef_item_id5 = Column(Integer, nullable=False)
+    ef_item_id_1 = Column(Integer, nullable=False)
+    ef_item_id_2 = Column(Integer, nullable=False)
+    ef_item_id_3 = Column(Integer, nullable=False)
+    ef_item_id_4 = Column(Integer, nullable=False)
+    ef_item_id_5 = Column(Integer, nullable=False)
 
 class ReportsModel(Base):
     __tablename__ = "reports"
@@ -65,6 +65,7 @@ class UserUpdateRequest(BaseModel):
 
 
 
+
 class Report(BaseModel):
 
     report_id: int
@@ -84,3 +85,29 @@ class ReportResponse(BaseModel):
     successes: str
     failures : str
     tasks : str
+
+class UserResiRequest(BaseModel):
+    name: str
+    mailAddress: str
+    class_id: int
+    period: int
+    ef_item_id1: int
+    ef_item_id2: int
+    ef_item_id3: int
+    ef_item_id4: int
+    ef_item_id5: int
+
+class UserResiResponse(BaseModel):
+    id: int
+    name: str
+    mailAddress: str
+    class_id: int
+    period: int
+    avatar_id: int
+    enemy_id: int
+    enemy_hp: int
+    ef_item_id1: int
+    ef_item_id2: int
+    ef_item_id3: int
+    ef_item_id4: int
+    ef_item_id5: int
