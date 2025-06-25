@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from src_fastAPI.util.db_connect import get_db  # DBセッション取得関数
-from src_fastAPI.models import User  # Userモデル
+#from sqlalchemy.orm import Session
+#from ...util.db_connect import get_db  # DBセッション取得関数
+from ...util.db_connect import User  # Userモデル
 
 router = APIRouter()
+app = FastAPI()
 
 class UserResiRequest(BaseModel):
     id = int
@@ -23,7 +24,7 @@ class UserResiRequest(BaseModel):
 
 # ④itemを追加（サンプル実装済み）
 @app.post("/user/regi", response_model=UserResiRequest)
-def create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
+def create_item(user: UserResiRequest): #, db_session: Session = Depends(get_db)
     db_user = User(usr_name=user.name, user_mailAddress=user.mailAddress,
                    class_id=user.class_id, period=user.period, avatar_id=user.avatar_id,
                    enemy_id=user.enemy_id, enemy_hp=user.enemy_hp,
@@ -31,9 +32,9 @@ def create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
                    ef_item_id3=user.ef_item_id3, ef_item_id4=user.ef_item_id4,
                    ef_item_id5=user.ef_item_id5
                    ) # idは自動採番されるため、リクエストには含めない
-    db_session.add(db_user)
-    db_session.commit()
-    db_session.refresh(db_user)
+    #db_session.add(db_user)
+    #db_session.commit()
+    #db_session.refresh(db_user)
     return UserResiRequest(id=db_user.id, name=db_user.name, mailAddress=db_user.mailAddress,
                             class_id=db_user.class_id, period=db_user.period, avatar_id=db_user.avatar_id,
                             enemy_id=db_user.enemy_id, enemy_hp=db_user.enemy_hp,
