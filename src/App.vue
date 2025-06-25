@@ -3,6 +3,7 @@
     <v-app-bar app color="black" dark>
       <v-btn text to="/">振り返り記入</v-btn>
       <v-btn text to="/reports/calender">カレンダー</v-btn>
+      <v-btn text to="/summary">要約</v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-title
         class="text-center"
