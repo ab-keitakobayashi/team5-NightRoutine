@@ -11,9 +11,3 @@ DATABASE_URL = "mysql+pymysql://admin:fy26admin@fy26-training-handson-db.cxok2mc
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
-class ItemModel(Base):
-    __tablename__ = "group5_users_test" # テーブル名
-    id = Column(Integer, primary_key=True) # 主キー
-    name = Column(String, index=True)
-    price = Column(Float)
