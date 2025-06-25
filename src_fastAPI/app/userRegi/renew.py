@@ -7,6 +7,7 @@ from ..models import User  # Userモデル
 router = APIRouter()
 
 
+
 class UserUpdateRequest(BaseModel):
     user_id: int
     class_id: int
