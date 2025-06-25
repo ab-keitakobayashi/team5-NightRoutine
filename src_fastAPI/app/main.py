@@ -5,3 +5,6 @@ app = FastAPI()
 
 # renew.pyのrouterを登録
 app.include_router(renew.router)
+
+#regi.pyのrouterを登録
+app.include_router(regi.router)
