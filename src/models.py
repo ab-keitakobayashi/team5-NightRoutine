@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-
+from datetime import datetime
+from pydantic import BaseModel
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relationship
 # """
 # DB接続設定とモデル定義
 # """
@@ -66,3 +67,10 @@ class Reports(Base):
 
 
 # Post
+
+
+class UserUpdateRequest(BaseModel):
+    user_id: int
+    class_id: int
+    period: int
+    efitem_id: int
