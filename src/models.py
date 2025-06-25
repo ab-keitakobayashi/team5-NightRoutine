@@ -57,3 +57,29 @@ class UserUpdateRequest(BaseModel):
     class_id: int
     period: int
     efitem_id: int
+
+class UserResiRequest(BaseModel):
+    name: str
+    mailAddress: str
+    class_id: int
+    period: int
+    ef_item_id1: int
+    ef_item_id2: int
+    ef_item_id3: int
+    ef_item_id4: int
+    ef_item_id5: int
+
+class UserResiResponse(BaseModel):
+    id: int
+    name: str
+    mailAddress: str
+    class_id: int
+    period: int
+    avatar_id: int
+    enemy_id: int
+    enemy_hp: int
+    ef_item_id1: int
+    ef_item_id2: int
+    ef_item_id3: int
+    ef_item_id4: int
+    ef_item_id5: int
