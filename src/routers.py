@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from renew import UserUpdateRequest
 from sqlalchemy.orm import Session
 from typing import List
 from models import (
     User,  
     ItemModel,
-    Reports 
+    Reports,
+    UserUpdateRequest
 )
 
 from db_connect import get_db
