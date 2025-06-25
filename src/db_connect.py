@@ -1,16 +1,27 @@
-from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, Float
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Base
+from dotenv import load_dotenv
+import os
 
-"""
-DB接続設定とモデル定義
-"""
-# DB接続設定
-DATABASE_URL = "aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com" ##URL
-engine = create_engine(DATABASE_URL, echo=True)
+# ローカル開発時のみ .env を読み込む
+load_dotenv()
+
+# 環境変数からDB URLを取得
+database_url = os.environ.get("DATABASE_URL")
+
+
+# エンジンを作成
+engine = create_engine(database_url)
+
+# セッションを作成
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# データベースを初期化（Lambda本番では別管理の方がよいが、簡易化のため残す）
+Base.metadata.create_all(bind=engine)
+
+
+# データベースセッションを取得する依存関係
 def get_db():
     db = SessionLocal()
     try:
