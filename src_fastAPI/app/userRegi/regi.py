@@ -44,9 +44,9 @@ def create_item(user: UserResiRequest): #, db_session: Session = Depends(get_db)
                    ef_item_id3=user.ef_item_id3, ef_item_id4=user.ef_item_id4,
                    ef_item_id5=user.ef_item_id5
                    ) # idは自動採番されるため、リクエストには含めない
-    #db_session.add(db_user)　2⃣　
-    #db_session.commit()　2⃣
-    #db_session.refresh(db_user)　2⃣
+    db_session.add(db_user)
+    db_session.commit()
+    db_session.refresh(db_user)
     return UserResiResponse(id=db_user.id, name=db_user.name, mailAddress=db_user.mailAddress,
                              class_id=db_user.class_id, period=db_user.period, avatar_id=db_user.avatar_id,
                              enemy_id=db_user.enemy_id, enemy_hp=db_user.enemy_hp,
