@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from routers import router
-from db import engine
+from db_connect import engine
 from models import Base
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
