@@ -35,8 +35,8 @@ class UserResiResponse(BaseModel):
 @app.post("/user/regi", response_model=UserResiResponse)
 def create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
     db_user = User(
-        name=user.name,
-        mailAddress=user.mailAddress,
+        user_name=user.name,
+        user_mailAddress=user.mailAddress,
         class_id=user.class_id,
         period=user.period,
         avatar_id=1,
@@ -52,9 +52,9 @@ def create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
     db_session.commit()
     db_session.refresh(db_user)
     return UserResiResponse(
-        id=db_user.id,
-        name=db_user.name,
-        mailAddress=db_user.mailAddress,
+        id=db_user.user_id,
+        name=db_user.user_name,
+        mailAddress=db_user.user_mailAddress,
         class_id=db_user.class_id,
         period=db_user.period,
         avatar_id=db_user.avatar_id,

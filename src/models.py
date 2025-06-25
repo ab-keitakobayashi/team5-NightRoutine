@@ -37,8 +37,8 @@ class Reports(Base):
     __tablename__ = "reports"
 
     report_id = Column(Integer, primary_key=True, index=True)
-    startTime = Column(Float, nullable=False)
-    endTime = Column(Float, nullable=False)
+    startTime = Column(String, nullable=False)
+    endTime = Column(String, nullable=False)
     successes = Column(String, nullable=False)
     failures = Column(String, nullable=False)
     tasks = Column(String, nullable=False)
