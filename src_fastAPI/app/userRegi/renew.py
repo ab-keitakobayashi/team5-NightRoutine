@@ -13,9 +13,9 @@ class UserUpdateRequest(BaseModel):
     period: int
     efitem_id: int
 
-@router.put("/user/update")
-def update_user_profile(request: UserUpdateRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == request.user_id).first()
+@router.put("/user/update/{user_id}", response_model=dict)
+def update_user_profile(user_id: int, request: UserUpdateRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.class_id = request.class_id
