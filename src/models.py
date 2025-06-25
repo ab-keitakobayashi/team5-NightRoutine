@@ -45,3 +45,13 @@ class User(Base):
     ef_item_id3 = Column(Integer, nullable=False)
     ef_item_id4 = Column(Integer, nullable=False)
     ef_item_id5 = Column(Integer, nullable=False)
+
+class Reports(Base):
+    __tablename__ = "reports"
+
+    report_id = Column(Integer, primary_key=True, index=True)
+    startTime = Column(Float, nullable=False)
+    endTime = Column(Float, nullable=False)
+    successes = Column(String, nullable=False)
+    failures = Column(String, nullable=False)
+    tasks = Column(String, nullable=False)
