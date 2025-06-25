@@ -1,8 +1,18 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy import create_engine, Column, Integer, String, Float
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
 
-class User(BaseModel):
+"""
+DB接続設定とモデル定義
+"""
+# DB接続設定
+DATABASE_URL = "" ##URL
+engine = create_engine(DATABASE_URL, echo=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+class User(Base):
     __tablename__ = "users"
 
     user_id = Column(Integer, primary_key=True, index=True)

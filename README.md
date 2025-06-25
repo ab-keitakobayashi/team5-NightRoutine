@@ -1,5 +1,7 @@
 # 開発
 
+npm run dev
+
 npm install
 
 npm install axios
@@ -28,8 +30,9 @@ This template should help get you started developing with Vue 3 and TypeScript i
 
 Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
 
-## RDS
+# AWS setting
 
 エンドポイント：aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com
-user: admin
-pass: fy26admin
+name: admin
+password:fy26admin
+(as same as the handson's docs)

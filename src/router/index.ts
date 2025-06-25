@@ -4,6 +4,7 @@ import HomeView from "../views/HomeView.vue";
 import Calendar from "../views/Calendar.vue";
 import EFView from "../views/EFView.vue";
 import ProfileView from "../views/ProfileView.vue";
+import SummaryView from "../views/Summary.vue";
 
 const routes = [
   { path: "/", component: HomeView },
@@ -11,6 +12,7 @@ const routes = [
   { path: "/reports/calender", component: Calendar },
   { path: "/reports/EF", component: EFView },
   { path: "/users", component: ProfileView },
+  { path: "/summary", component: SummaryView }
 ];
 
 const router = createRouter({
