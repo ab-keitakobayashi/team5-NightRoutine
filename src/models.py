@@ -12,6 +12,9 @@ from sqlalchemy.orm import sessionmaker, Session
 # SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+
+# モデル定義
+# データベースのテーブルを定義するためのモデルクラスを作成します。
 class ItemModel(Base):
     __tablename__ = "testusers"
 
@@ -55,3 +58,11 @@ class Reports(Base):
     successes = Column(String, nullable=False)
     failures = Column(String, nullable=False)
     tasks = Column(String, nullable=False)
+
+
+
+# Pydanticモデル
+# データのバリデーションとシリアライズを行うためのモデル]
+
+
+# Post
