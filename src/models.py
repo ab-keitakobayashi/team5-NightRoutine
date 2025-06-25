@@ -66,11 +66,13 @@ class ReviewsModel(Base):
 
 
 class UserUpdateRequest(BaseModel):
-    user_id: int
     class_id: int
     period: int
-    efitem_id: int
-
+    ef_item_id_1: int
+    ef_item_id_2: int
+    ef_item_id_3: int
+    ef_item_id_4: int
+    ef_item_id_5: int
 
 
 
