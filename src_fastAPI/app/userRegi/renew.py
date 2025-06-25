@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ..db import get_db  # DBセッション取得関数
-from ..models import User  # Userモデル
+from models.py_models import User  # Userモデル
 
 router = APIRouter()
 
