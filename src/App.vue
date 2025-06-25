@@ -24,9 +24,11 @@
 
 <script setup lang="ts"></script>
 <style scoped>
-/* .full-width {
+.full-width {
   width: 100vw;
-  padding: 0;
-  margin: 0;
-} */
+  padding-right: 0;
+  padding-left: 0;
+  margin-right: 0;
+  margin-left: 0;
+}
 </style>

@@ -8,6 +8,8 @@ npm install axios
 
 npm install v-calendar@next @popperjs/core
 
+npm install @mdi/font
+
 npm run dev
 
 # saaya 用 git hub のうれしいコマンド

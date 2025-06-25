@@ -9,6 +9,7 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 //下記の赤線は無視
 import "vuetify/styles";
+import "@mdi/font/css/materialdesignicons.css";
 import VCalendar from "v-calendar";
 import "v-calendar/style.css";
 
