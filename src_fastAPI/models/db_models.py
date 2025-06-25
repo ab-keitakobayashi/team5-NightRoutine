@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker, Session
 Base = declarative_base()
 
 class ItemModel(Base):
-    __tablename__ = "group5_users"
+    __tablename__ = "testusers"
 
     user_id = Column(Integer, primary_key=True, index=True)
     user_name = Column(String, nullable=False)
