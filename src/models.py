@@ -50,6 +50,14 @@ class tasksModel(Base):
     tasks_description = Column(String, nullable=False)
 
 
+class ReviewsModel(Base):
+    __tablename__ = "reviews"
+
+    review_id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, primary_key=True, index=True)
+    successes = Column(String, nullable=False)
+    failures = Column(String, nullable=False)
+    ai_comment = Column(String, nullable=False)
 
 # Pydanticモデル
 # データのバリデーションとシリアライズを行うためのモデル]
