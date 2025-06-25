@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from typing import List
 from models import (
     User,  
-    ItemModel,
     Reports,
     UserUpdateRequest
 )
