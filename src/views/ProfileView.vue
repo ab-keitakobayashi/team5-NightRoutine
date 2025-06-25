@@ -1,14 +1,24 @@
 <template>
+  <v-alert
+    v-if="errorMessage"
+    type="error"
+    color="red"
+    variant="elevated"
+    class="mb-4"
+  >
+    {{ errorMessage }}
+  </v-alert>
   <v-row>
-    <v-col cols="4">
+    <v-col cols="3">
       <v-row>
-        <v-col cols="6">
+        <v-col cols="4">
           <div class="d-flex align-center justify-end fill-height">
             <p>ニックネーム</p>
           </div>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="8">
           <v-text-field
+            v-model="user_name"
             variant="outlined"
             placeholder="山田たろう"
             type="text"
@@ -16,122 +26,198 @@
         </v-col>
       </v-row>
     </v-col>
-    <v-col cols="4">
+    <v-col cols="3">
       <v-row>
-        <v-col cols="4">
+        <v-col cols="3">
           <div class="d-flex align-center justify-end fill-height">
             <p>クラス</p>
           </div>
         </v-col>
-        <v-col cols="8">
-          <v-select :items="classes" label="クラスを選択"></v-select>
+        <v-col cols="9">
+          <v-select
+            v-model="user_class_id"
+            :items="classes"
+            label="クラスを選択"
+          ></v-select>
         </v-col>
       </v-row>
     </v-col>
     <v-col cols="4">
       <v-row>
-        <v-col cols="4">
+        <v-col cols="5">
           <div class="d-flex align-center justify-end fill-height">
             <p>目標設定期間</p>
           </div>
         </v-col>
-        <v-col cols="8">
+        <v-col cols="7">
           <v-select
+            v-model="user_goal_setting_period"
             :items="goal_setting_period"
-            label="目標設定期間を選択"
+            label="目標設定期間選択"
           ></v-select>
         </v-col>
       </v-row>
+    </v-col>
+    <v-col cols="2">
+      <v-btn @click="save_profile" x-large color="warning" variant="outlined"
+        >保存</v-btn
+      >
     </v-col>
   </v-row>
 
   <v-data-table
     theme="dark"
+    :headers="headers"
     :items="items"
-    item-value="name"
-    v-model="selected"
+    item-value="value"
+    v-model="ef_item_ids"
     show-select
-  ></v-data-table>
+    ><template v-slot:header.EF_class="{ column }"
+      ><span>{{ column.text }}</span></template
+    >
+    <template v-slot:header.parent_category_id="{ column }"
+      ><span>{{ column.text }}</span></template
+    >
+    <template v-slot:header.child_category_id="{ column }"
+      ><span>{{ column.text }}</span></template
+    >
+    <template v-slot:header.item="{ column }"
+      ><span>{{ column.text }}</span></template
+    >
+  </v-data-table>
 </template>
 
 <script setup lang="ts">
-//DBから取得するクラス一覧をclassesに格納
-import { ref } from "vue";
+const classes = [
+  { title: "アナリスト", value: 1 },
+  { title: "コンサルタント", value: 2 },
+  { title: "シニアコンサルタント", value: 3 },
+];
 
-const classes = ["アナリスト", "コンサルタント", "シニアコンサルタント"];
-const goal_setting_period = ["3か月間", "6か月間"];
+const goal_setting_period = [
+  { title: "3ヶ月", value: 3 },
+  { title: "6ヶ月", value: 6 },
+  { title: "1年", value: 12 },
+];
 
-const selected = ref([]);
+const headers = [
+  { text: "クラス", value: "EF_class" },
+  { text: "親カテゴリー", value: "parent_category_id" },
+  { text: "子カテゴリー", value: "child_category_id" },
+  { text: "EF項目", value: "item" },
+];
+
+// EF項目のデータをDBから取得する
+// ここではダミーデータを使用
 const items = [
   {
-    name: "🍎 Apple",
-    location: "Washington",
-    height: "0.1",
-    base: "0.07",
-    volume: "0.0001",
+    EF_class: "アナリスト",
+    parent_category_id: "知識",
+    child_category_id: "ロジカルシンキング",
+    item: "上位者の指示に従って行動する",
+    value: 1,
   },
   {
-    name: "🍌 Banana",
-    location: "Ecuador",
-    height: "0.2",
-    base: "0.05",
-    volume: "0.0002",
+    EF_class: "アナリスト",
+    parent_category_id: "知識",
+    child_category_id: "ロジカルシンキング",
+    item: "自分の意見を持ち、発言する",
+    value: 2,
   },
   {
-    name: "🍇 Grapes",
-    location: "Italy",
-    height: "0.02",
-    base: "0.02",
-    volume: "0.00001",
+    EF_class: "アナリスト",
+    parent_category_id: "知識",
+    child_category_id: "ロジカルシンキング",
+    item: "チームの目標を理解し、貢献する",
+    value: 3,
   },
   {
-    name: "🍉 Watermelon",
-    location: "China",
-    height: "0.4",
-    base: "0.3",
-    volume: "0.03",
+    EF_class: "アナリスト",
+    parent_category_id: "チームワーク",
+    child_category_id: "責任感",
+    item: "問題解決のために積極的に行動する",
+    value: 4,
   },
   {
-    name: "🍍 Pineapple",
-    location: "Thailand",
-    height: "0.3",
-    base: "0.2",
-    volume: "0.005",
+    EF_class: "アナリスト",
+    parent_category_id: "チームワーク",
+    child_category_id: "責任感",
+    item: "新しいアイデアを提案する",
+    value: 5,
   },
   {
-    name: "🍒 Cherries",
-    location: "Turkey",
-    height: "0.02",
-    base: "0.02",
-    volume: "0.00001",
+    EF_class: "アナリスト",
+    parent_category_id: "チームワーク",
+    child_category_id: "行動力",
+    item: "他のメンバーと協力して作業する",
+    value: 6,
   },
   {
-    name: "🥭 Mango",
-    location: "India",
-    height: "0.15",
-    base: "0.1",
-    volume: "0.0005",
+    EF_class: "アナリスト",
+    parent_category_id: "技術",
+    child_category_id: "柔軟性",
+    item: "フィードバックを受け入れ、改善する",
+    value: 7,
   },
   {
-    name: "🍓 Strawberry",
-    location: "USA",
-    height: "0.03",
-    base: "0.03",
-    volume: "0.00002",
+    EF_class: "アナリスト",
+    parent_category_id: "技術",
+    child_category_id: "柔軟性",
+    item: "自分の感情を適切に管理する",
+    value: 8,
   },
   {
-    name: "🍑 Peach",
-    location: "China",
-    height: "0.09",
-    base: "0.08",
-    volume: "0.0004",
+    EF_class: "アナリスト",
+    parent_category_id: "技術",
+    child_category_id: "タスク管理",
+    item: "タスクを効率的に管理する",
+    value: 9,
   },
   {
-    name: "🥝 Kiwi",
-    location: "New Zealand",
-    height: "0.05",
-    base: "0.05",
-    volume: "0.0001",
+    EF_class: "アナリスト",
+    parent_category_id: "技術",
+    child_category_id: "タスク管理",
+    item: "変化に柔軟に対応する",
+    value: 10,
   },
 ];
+import { ref } from "vue";
+
+const user_name = ref("");
+// アナリスト＝1, コンサルタント＝2, シニアコンサルタント＝3
+const user_class_id = ref();
+// 目標設定期間は3ヶ月＝3、6ヶ月=6、1年=12
+const user_goal_setting_period = ref();
+// 選択されたEFのIDを格納する
+const ef_item_ids = ref([]);
+
+const errorMessage = ref("");
+
+async function save_profile() {
+  errorMessage.value = "";
+
+  if (!user_name.value) {
+    errorMessage.value = "ニックネームを入力してください。";
+    return;
+  }
+  if (!user_class_id.value) {
+    errorMessage.value = "クラスを選択してください。";
+    return;
+  }
+  if (!user_goal_setting_period.value) {
+    errorMessage.value = "期間を選択してください。";
+    return;
+  }
+  if (ef_item_ids.value.length !== 5) {
+    errorMessage.value = "EF項目は5つ選択してください。";
+    return;
+  }
+  // ここにプロフィール保存のロジックを追加
+  console.log(
+    user_name.value,
+    user_class_id.value,
+    user_goal_setting_period.value,
+    ef_item_ids.value
+  );
+}
 </script>

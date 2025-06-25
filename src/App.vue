@@ -4,6 +4,8 @@
       <v-btn text to="/">振り返り記入</v-btn>
       <v-btn text to="/reports/calender">カレンダー</v-btn>
       <v-btn text to="/summary">要約</v-btn>
+      <v-btn text to="/reports/ef">EF一覧</v-btn>
+      <v-btn text to="/users">プロフィール</v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-title
         class="text-center"
@@ -14,7 +16,7 @@
       <v-spacer></v-spacer>
       <v-btn text to="/login">Login</v-btn>
     </v-app-bar>
-    <v-main fluid class="full-width bg-grey-darken-4">
+    <v-main class="full-width bg-grey-darken-4">
       <v-container>
         <router-view />
       </v-container>
@@ -25,7 +27,6 @@
 <script setup lang="ts"></script>
 <style scoped>
 .full-width {
-  width: 100vw;
   padding-right: 0;
   padding-left: 0;
   margin-right: 0;
