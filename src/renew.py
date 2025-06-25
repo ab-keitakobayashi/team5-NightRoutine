@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from db_connect import engine #DBセッション取得関数
 from db_connect import get_db
-from models import Base# Userモデル
+from models import User# Userモデル
 
 router = APIRouter()
 

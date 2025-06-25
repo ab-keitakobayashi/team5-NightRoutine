@@ -3,9 +3,11 @@ from renew import UserUpdateRequest
 from sqlalchemy.orm import Session
 from typing import List
 from models import (
-    User,  
-    ItemModel,
-    Reports,
+    User,
+    ReportsModel,
+    UserResiRequest,
+    UserResiResponse,
+    Report,
     UserUpdateRequest
 )
 
