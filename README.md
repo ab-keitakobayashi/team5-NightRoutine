@@ -45,7 +45,7 @@ user_name varchar(250),
 user_mailAddress varchar(250),
 class_id int,oython
 period date,
-avater_id int,
+avatar_id int,
 enemy_id int,
 enemy_HP int,
 EF_item_id_1 int,
