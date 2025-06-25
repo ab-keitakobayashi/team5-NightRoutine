@@ -1,10 +1,14 @@
 # 開発
 
+npm run dev
+
 npm install
 
 npm install axios
 
 npm install v-calendar@next @popperjs/core
+
+npm install @mdi/font
 
 npm run dev
 
@@ -28,7 +32,26 @@ This template should help get you started developing with Vue 3 and TypeScript i
 
 Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
 
-## RDS
+# AWS setting
 
-user: admin
-pass: fy26admin
+エンドポイント：aws-handson-db-group-5.c7c4ksi06r6a.ap-southeast-2.rds.amazonaws.com
+name: admin
+password:fy26admin
+(as same as the handson's docs)
+
+for test
+table name: testusers
+colunm:
+user_id INT PRIMARY KEY AUTO_INCREMENT,
+user_name varchar(250),
+user_mailAddress varchar(250),
+class_id int,
+period date,
+avater_id int,
+enemy_id int,
+enemy_HP int,
+EF_item_id_1 int,
+EF_item_id_2 int,
+EF_item_id_3 int,
+EF_item_id_4 int,
+EF_item_id_5 int
