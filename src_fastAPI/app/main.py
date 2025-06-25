@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src_fastAPI.app.userRegi import renew, regi
+from .userRegi import renew, regi
 
 app = FastAPI()
 
