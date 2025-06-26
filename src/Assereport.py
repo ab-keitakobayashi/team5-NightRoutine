@@ -73,7 +73,7 @@ def get_reviews_and_advice(
             ReportsModel.user_id == user_id,
             ReportsModel.write_date >= start_date,
             ReportsModel.write_date <= end_date,
-            ReportsModel.is_deleted == False
+            ReportsModel.is_deleted == 0
         )
     ).all()
     report_ids = [r[0] for r in report_ids]
@@ -106,11 +106,27 @@ def get_reviews_and_advice(
     ef_items_selected = db.query(EfModel).filter(EfModel.ef_item_id.in_(selected_ef_ids)).all()
 
     # 職位(class_id)に紐づく全EFのうち、未選択のものから2つ取得
-    all_class_ef = db.query(EfModel).filter(EfModel.class_id == user.class_id).all()
-    remaining_ef_items = [e for e in all_class_ef if e.ef_item_id not in selected_ef_ids][:2]
+    # 職位(class_id)に紐づく全EFのうち、未選択のef_category_idごとに1つだけ取得
 
+    # すでに選択済みのef_category_idを取得
+    selected_categories = set()
+    for ef in ef_items_selected:
+        selected_categories.add(ef.ef_category_id)
+
+    # 現在の職位(class_id)に紐づくEFから、未選択のカテゴリのみを抽出
+    all_class_ef = db.query(EfModel).filter(EfModel.class_id == user.class_id).all()
+    remaining_ef_items = []
+    for ef in all_class_ef:
+        if ef.ef_category_id not in selected_categories:
+            remaining_ef_items.append(ef)
+    selected_categories.add(ef.ef_category_id)  # 1カテゴリにつき1つだけ
+
+    # 2つまで取得
+    remaining_ef_items = remaining_ef_items[:2]
     # 合成（合計7件になる想定）
     ef_items = ef_items_selected + remaining_ef_items
+    
+    
 
     # 4. Bedrockに送るデータを整形
     reviews_data = [
