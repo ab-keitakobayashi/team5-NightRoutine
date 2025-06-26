@@ -1,58 +1,279 @@
 from fastapi import FastAPI,APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from models import Reports ,Report , ReportResponse# Userモデル
+from models import  ReportResponse# Userモデル
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Float
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime,ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-
-
+from db_connect import get_db
+from datetime import datetime
+from typing import List
 """
 DB接続設定とモデル定義
 """
-# DB接続設定
-DATABASE_URL = "mysql+pymysql://admin:fy26admin@fy26-training-handson-db.cxok2mc8wgeq.ap-northeast-1.rds.amazonaws.com:3306/handson"
-engine = create_engine(DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
+# DB接続設定
 router = APIRouter()
 app = FastAPI()
+Base = declarative_base()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # 必要に応じて追加
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class User(Base):
+    __tablename__ = "testusers"
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    user_name = Column(String, nullable=False)
+    user_mailAddress = Column(String, unique=True, nullable=False)
+    class_id = Column(Integer, nullable=False)
+    period = Column(Integer, nullable=False)
+    avatar_id = Column(Integer, nullable=False)
+    enemy_id = Column(Integer, nullable=False)
+    enemy_hp = Column(Integer, nullable=False)
+    ef_item_id_1 = Column(Integer, nullable=False)
+    ef_item_id_2 = Column(Integer, nullable=False)
+    ef_item_id_3 = Column(Integer, nullable=False)
+    ef_item_id_4 = Column(Integer, nullable=False)
+    ef_item_id_5 = Column(Integer, nullable=False)
+
+class Report(BaseModel):
+    start_time: List[str]
+    # endTime: List[str]
+    successes: str
+    failures: str
+    tasks: List[str] 
+
+class ReportResponse(BaseModel):
     
-# データベースセッションをリクエストごとに取得するための依存関係を定義
-# リクエスト処理が終わると自動でセッションを閉じる
-def get_db_session():
-    db_session = SessionLocal()
-    try:
-        yield db_session
-    finally:
-        db_session.close()
+    start_time: List[str]  # タスクの開始時間のリスト
+    successes: str  # 成功したタスクの説明
+    failures: str  # 失敗したタスクの説明
+    assessments: dict  # レポートの詳細データ
 
+    # user_id: int
+    # report_id: int
+    # start_time: List[str]
+    # # endTime: List[str]
+    # successes: str
+    # failures : str
+    # tasks: List[str]
+
+class tasksModel(Base):
+    __tablename__ = "tasks"
+
+    task_id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer,  unique= True,nullable=True)#ForeignKey('reports.report_id'))
+    start_time = Column(String, nullable=False)
+    task_description = Column(String, nullable=False)
+
+
+class ReviewsModel(Base):
+    __tablename__ = "reviews"
+
+    review_id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, unique= True,nullable=True)#
+    successes = Column(String, nullable=False)
+    failures = Column(String, nullable=False)
+    ai_comment = Column(String, nullable=False)
+
+Base = declarative_base()
+class ReportsModel(Base):
+    __tablename__ = "reports"
+
+    user_id = Column(Integer, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
+    report_id = Column(Integer, primary_key=True, index=False)
+    write_date = Column(DateTime, default=datetime, nullable=False)
+    is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み   
 
 
 # # ④itemを追加（サンプル実装済み）
-@app.post("/report/regi/{user_id}/{day}", response_model=ReportResponse)
-def registor_report(user_id: int, day: datetime, report: Report, db_session: Session = Depends(get_db_session)): 
-#     # report = Reports(
-#     #     startTime=0.0,
-#     #     endTime=0.0,
-#     #     successes="",
-#     #     failures="",
-#     #     tasks=""
-#     # ) # idは自動採番されるため、リクエストには含めない
-    db_item = Reports(startTime=report.startTime, endTime=report.endTime, successes=report.successes, failures=report.failures, tasks=report.tasks) # idは自動採番されるため、リクエストには含めない
-    db_session.add(db_item)
-    db_session.commit()
-    db_session.refresh(db_item)
-    return ReportResponse(user_id=user_id, 
-                            report_id=report.report_id, 
-                            startTime=report.startTime, 
-                            endTime=report.endTime, 
-                            successes=report.successes, 
-                            failures=report.failures,
-                            tasks=report.tasks)  
+@app.post("/report/{user_id}/{day}/regi")#, response_model=ReportResponse)
+def registor_report(user_id: int, day: datetime, 
+                    report: Report, db_session: Session = Depends(get_db)): 
 
-# @app.post("/report/regi/{user_id}")
-# def post_report(user_id: int):
-#     return "aaaaaa"
+    db_repo = ReportsModel(user_id = user_id, 
+                           write_date = day, 
+                           is_deleted = 0) #task_idは自動採番されるため、リクエストには含めない
+    db_session.add(db_repo)
+    print("db_repo", db_repo)
+    db_session.commit()
+    db_session.refresh(db_repo)
+
+    # start_timeとtasksは2次元配列なので、先頭から取り出して登録
+    for i in range(min(len(report.start_time), len(report.tasks))):
+        start_time_item = report.start_time[i] if report.start_time else None
+        print("start_time_item", start_time_item)
+        task_description_item = report.tasks[i] if report.tasks else None
+        db_task = tasksModel(
+            report_id=db_repo.report_id,
+            start_time=start_time_item,
+            task_description=task_description_item
+        )
+        db_session.add(db_task)
+        db_session.commit()
+    
+    db_review = ReviewsModel(
+                           report_id = db_repo.report_id,
+                           successes = report.successes, 
+                           failures = report.failures,
+                           ai_comment = "AIのコメント")
+    
+    db_session.add(db_review)
+    db_session.commit()
+    db_session.refresh(db_review)
+    print("db_review", db_review)
+    return ReportResponse(
+            start_time=report.start_time,
+            successes=report.successes,
+            failures=report.failures,
+            assessments = {
+                "items": [
+                    { "EF_item": "自己管理", "score": 10, "total_score": 10 },
+                    { "EF_item": "注意力", "score": -10, "total_score": 8 },
+                    { "EF_item": "感情制御", "score": -10, "total_score": 9 },
+                    { "EF_item": "計画性", "score": 10, "total_score": 7 },
+                    { "EF_item": "柔軟性", "score": 10, "total_score": 12 },
+                ],
+                "assessment":
+                    "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。",
+            })  
+    # return ReportResponse(user_id=user_id, 
+    #                         report_id=db_repo.report_id, 
+    #                         startTime=report.start_time, 
+    #                         endTime=report.endTime, 
+    #                         successes=report.successes, 
+    #                         failures=report.failures,
+    #                         tasks=report.tasks)  
+
+#レビューを更新
+@app.put("/report/regi/{user_id}/{day}/update")
+def update_report(user_id: int, day: datetime, report: Report, db: Session = Depends(get_db)):
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    
+    if not db_repo:
+        print("db_repo not found")
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+    if not db_tasks:
+        raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+
+    db_tasks.start_time = report.start_time
+    db_tasks.task_description = report.tasks
+    db.commit()
+    db.refresh(db_tasks)
+
+    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
+    if not db_review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    db_review.successes = report.successes
+    db_review.failures = report.failures
+    db_review.ai_comment = "AIのコメント(updated)"
+    db.commit()
+    db.refresh(db_review)
+
+    return db_review
+
+#レビューを削除
+@app.patch("/report/regi/{user_id}/{day}/delete")
+def update_report(user_id: int, day: datetime, db: Session = Depends(get_db)):
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    
+    if not db_repo:
+        print("db_repo not found")
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    db_repo.is_deleted = 1  # 1: 削除済み 
+    db.commit()
+    db.refresh(db_repo)
+    return db_repo
+
+#レビューを取得
+@app.post("/report/{user_id}/{day}/get")
+def get_report(user_id: int, day: datetime,  db: Session = Depends(get_db)):
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    
+    if not db_repo:
+        print("db_repo not found")
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+    if not db_tasks:
+        raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+
+
+    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
+    if not db_review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+
+    return ReportResponse(user_id=user_id, 
+                        report_id=db_repo.report_id, 
+                        startTime=db_tasks.start_time, 
+                        successes=db_review.successes, 
+                        failures=db_review.failures,
+                        tasks=db_tasks.task_description)  
+
+#レビューを一時保存
+@app.post("/report/{user_id}/{day}/save")
+def save_report(user_id: int, day: datetime, report: Report, db_session: Session = Depends(get_db)):
+    db_repo = db_session.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+
+    if not db_repo:
+
+        db_repo = ReportsModel(user_id = user_id, 
+                           write_date = day, 
+                           is_deleted = 0) #task_idは自動採番されるため、リクエストには含めない
+        db_session.add(db_repo)
+        print("db_repo", db_repo)
+        db_session.commit()
+        db_session.refresh(db_repo)
+
+        db_task = tasksModel(
+                            report_id = db_repo.report_id,
+                            start_time = report.start_time, 
+                            task_description = report.tasks)
+        db_session.add(db_task)
+        db_session.commit()
+        db_session.refresh(db_task)
+        
+        db_review = ReviewsModel(
+                            report_id = db_repo.report_id,
+                            successes = report.successes, 
+                            failures = report.failures,
+                            ai_comment = "AIのコメント")
+        
+        db_session.add(db_review)
+        db_session.commit()
+        db_session.refresh(db_review)
+        db_tasks = db_session.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+    else:
+        db_tasks = db_session.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+        if not db_tasks:
+            raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+
+        db_tasks.start_time = report.start_time
+        db_tasks.task_description = report.tasks
+        db_session.commit()
+        db_session.refresh(db_tasks)
+
+        db_review = db_session.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
+        if not db_review:
+            raise HTTPException(status_code=404, detail="Review not found")
+
+        db_review.successes = report.successes
+        db_review.failures = report.failures
+        db_review.ai_comment = "AIのコメント(updated)"
+        db_session.commit()
+        db_session.refresh(db_review)
+
+    return db_repo
