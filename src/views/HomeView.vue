@@ -101,10 +101,7 @@
 
 <script setup>
 
-defineProps(['inputdate'])
-if(inputdate) {
-  get(inputdate);
-} 
+
 import { ref, computed, watch } from "vue";
 import axios from "axios";
 
@@ -121,6 +118,21 @@ const day = ref(new Date().toISOString().slice(0, 10));
 
 // タスク内容
 const tasks = ref([]);
+const props = defineProps(['inputdate']);
+
+// 画面表示時とinputdateが変わった時にgetを呼ぶ
+console.log(`inputdate: ${props.inputdate}`);
+
+watch(
+  () => props.inputdate,
+  (newVal) => {
+    if (newVal) {
+      get(newVal);
+    }
+  },
+  { immediate: true }
+);
+
 
 
 // 30分ごとの時刻リストを生成
@@ -168,13 +180,7 @@ function autoFillTask(idx) {
 }
 
 // ダミーデータ
-const efData = ref([
-  { EF_item: "自己管理", score: 1, total_score: 10 },
-  { EF_item: "注意力", score: -1, total_score: 8 },
-  { EF_item: "感情制御", score: -1, total_score: 9 },
-  { EF_item: "計画性", score: 1, total_score: 7 },
-  { EF_item: "柔軟性", score: 1, total_score: 12 },
-]);
+const efData = ref([]);
 
 async function submit() {
   // 送信処理を実装
@@ -247,15 +253,15 @@ async function save() {
 
 
 async function get(inputdate) {
-  
 
+  console.log(`http://127.0.0.1:8000/report/${userID.value}/${inputdate}/get`);
   const response = await axios.post(
     `http://127.0.0.1:8000/report/${userID.value}/${inputdate}/get`,
   )
 
   console.log(response);
-  startTime.value = response.data.start_time;
-  endTime.value = response.data.end_time; 
+  timeSlots.value = response.data.start_time;
+  tasks.value = response.data.tasks 
   successes.value = response.data.successes;
   failures.value = response.data.failures;  
   efData.value = response.data.assessments.items;

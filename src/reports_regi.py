@@ -57,7 +57,7 @@ class ReportResponse(BaseModel):
     successes: str  # 成功したタスクの説明
     failures: str  # 失敗したタスクの説明
     assessments: dict  # レポートの詳細データ
-
+    tasks: List[str]  # タスクの説明
     # user_id: int
     # report_id: int
     # start_time: List[str]
@@ -228,6 +228,7 @@ def get_report(user_id: int, day: datetime,  db: Session = Depends(get_db)):
             start_time=start_times,
             successes=db_review.successes,
             failures=db_review.failures,
+            tasks=[task.task_description for task in db_tasks],
             assessments = {
                 "items": [
                     { "EF_item": "自己管理", "score": 10, "total_score": 10 },
