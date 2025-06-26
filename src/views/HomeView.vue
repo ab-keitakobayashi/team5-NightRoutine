@@ -100,6 +100,11 @@
 </template>
 
 <script setup>
+
+defineProps(['inputdate'])
+if(inputdate) {
+  get(inputdate);
+} 
 import { ref, computed, watch } from "vue";
 import axios from "axios";
 
@@ -202,20 +207,6 @@ async function submit() {
     }
   )
 
-  // ダミーデータ
-  // const response = {
-  //   data: {
-  //     items: [
-  //       { EF_item: "自己管理", score: 10, total_score: 10 },
-  //       { EF_item: "注意力", score: -10, total_score: 8 },
-  //       { EF_item: "感情制御", score: -10, total_score: 9 },
-  //       { EF_item: "計画性", score: 10, total_score: 7 },
-  //       { EF_item: "柔軟性", score: 10, total_score: 12 },
-  //     ],
-  //     assessment:
-  //       "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。",
-  //   },
-  // };
   console.log(response);
   efData.value = response.data.assessments.items;
   assessment.value = response.data.assessments.assessment;
@@ -253,4 +244,22 @@ async function save() {
     console.error("Error saving data:", error);
   }
 }
+
+
+async function get(inputdate) {
+  
+
+  const response = await axios.post(
+    `http://127.0.0.1:8000/report/${userID.value}/${inputdate}/get`,
+  )
+
+  console.log(response);
+  startTime.value = response.data.start_time;
+  endTime.value = response.data.end_time; 
+  successes.value = response.data.successes;
+  failures.value = response.data.failures;  
+  efData.value = response.data.assessments.items;
+  assessment.value = response.data.assessments.assessment;
+}
+
 </script>
