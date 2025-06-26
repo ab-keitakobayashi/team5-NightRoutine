@@ -182,6 +182,7 @@ const items = [
   },
 ];
 import { ref } from "vue";
+import axios from "axios";
 
 const user_name = ref("");
 // アナリスト＝1, コンサルタント＝2, シニアコンサルタント＝3
@@ -219,5 +220,23 @@ async function save_profile() {
     user_goal_setting_period.value,
     ef_item_ids.value
   );
+
+
+  const ef_item_id_array = Array.isArray(ef_item_ids.value) ? [...ef_item_ids.value] : [];
+  const response = await axios.post(
+    `http://127.0.0.1:8000/user/regi`,
+    {
+      name: user_name.value,
+      class_id: user_class_id.value,
+      period: user_goal_setting_period.value,
+      ef_item_id_array: ef_item_id_array,
+    }
+  )
+  console.log(response);
+  if (response.status === 200) {
+    alert("プロフィールが保存されました。");
+  } else {
+    errorMessage.value = "プロフィールの保存に失敗しました。";
+  }
 }
 </script>
