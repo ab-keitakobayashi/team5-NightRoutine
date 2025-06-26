@@ -145,7 +145,33 @@ def update_report(user_id: int, day: datetime, report: Report, db: Session = Dep
         raise HTTPException(status_code=404, detail="Report not found")
 
     db_repo.is_deleted = 1  # 1: 削除済み 
-    db.session.commit()
-    db.session.refresh(db_repo)
+    db.commit()
+    db.refresh(db_repo)
 
     return db_repo
+
+#レビューを取得
+@app.post("/report/regi/get/{user_id}/{day}")
+def get_report(user_id: int, day: datetime,  db: Session = Depends(get_db)):
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    
+    if not db_repo:
+        print("db_repo not found")
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+    if not db_tasks:
+        raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+
+
+    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
+    if not db_review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+
+    return ReportResponse(user_id=user_id, 
+                        report_id=db_repo.report_id, 
+                        startTime=db_tasks.start_time, 
+                        successes=db_review.successes, 
+                        failures=db_review.failures,
+                        tasks=db_tasks.task_description)  
