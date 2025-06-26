@@ -78,10 +78,18 @@ const attributes = [
 
 const selectedDate = ref<Date | null>(null);
 
-// 日付がクリックされたらリンクを生成
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+// 日付がクリックされたらyyyymmdd形式でリンクを生成し遷移
 function ondayClick(day: { date: Date }) {
   selectedDate.value = day.date;
-  console.log("選択した日付:", selectedDate.value);
+  const yyyy = day.date.getFullYear();
+  const mm = String(day.date.getMonth() + 1).padStart(2, "0");
+  const dd = String(day.date.getDate()).padStart(2, "0");
+  const dateStr = `${yyyy}${mm}${dd}`;
+  router.push(`/reports/show/${dateStr}`);
 }
 
 const enemy_hp = ref(100); // 敵のHPの値をここで管理
