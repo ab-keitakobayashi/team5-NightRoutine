@@ -16,9 +16,14 @@
 </template>
 
 <script setup lang="ts">
-// コグニートに飛ぶロジックを追加
 async function login() {
   console.log("ログインボタンがクリックされました");
+
+  // Cognitoの認証URL
+  const cognitoAuthUrl = "https://ap-southeast-2ngijy9ne3.auth.ap-southeast-2.amazoncognito.com/login?client_id=4qfsnitgm7uc023mv5icdq04i0&response_type=code&scope=openid%20email%20phone&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2Fcallback";
+
+  // リダイレクト
+  window.location.href = cognitoAuthUrl;
 }
 </script>
 
