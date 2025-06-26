@@ -6,6 +6,16 @@ from models import User, UserResiResponse  # Userモデル
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # 必要に応じて追加
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/user/{user_id}", response_model=UserResiResponse)
 def get_user(user_id: int, db_session: Session = Depends(get_db)):
     """

@@ -13,6 +13,7 @@
         <v-row>
           <v-col cols="4">
             <v-img :src="`/assets/avatars/${user_level}.png`"></v-img>
+            <p class="text-h5 mt-5">{{ user_name }}</p>
           </v-col>
           <v-col cols="8">
             <v-card-title class="text-h3 px-5 text-wrap"
@@ -49,13 +50,28 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import axios from "axios";
+
+const userID = ref(1); // ユーザーIDのダミー値
+const user_name = ref("");
+
+onMounted(async () => {
+  try {
+    const res = await axios.get(`http://127.0.0.1:8000/user/${userID.value}`);
+    user_name.value = res.data.name; // APIのレスポンスに合わせてプロパティ名を指定
+    processReports(reports);
+    console.log("APIレスポンス", res.data);
+  } catch (e) {
+    user_name.value = "ニックネーム取得失敗";
+    console.log("APIエラー", e);
+  }
+});
 
 // カレンダーの属性データ
 const attributes = [
   {
     key: "successes",
     dates: ["2025-07-20", "2025-08-11"],
-    customData: { type: "holiday" },
     highlight: {
       style: {
         backgroundColor: "red",
@@ -66,7 +82,6 @@ const attributes = [
   {
     key: "failures",
     dates: ["2025-07-25"],
-    customData: { type: "event" },
     highlight: {
       style: {
         backgroundColor: "blue",
@@ -88,12 +103,12 @@ function ondayClick(day: { date: Date }) {
   const yyyy = day.date.getFullYear();
   const mm = String(day.date.getMonth() + 1).padStart(2, "0");
   const dd = String(day.date.getDate()).padStart(2, "0");
-  const dateStr = `${yyyy}${mm}${dd}`;
+  const dateStr = `${yyyy}-${mm}-${dd}`;
   router.push(`/reports/show/${dateStr}`);
 }
 
 const enemy_hp = ref(100); // 敵のHPの値をここで管理
-const user_level = 1; // 1~15の間でユーザーレベルを設定（仮の値、実際はAPI等から取得）
+const user_level = ref(1); // 1~15の間でユーザーレベルを設定（仮の値、実際はAPI等から取得）
 
 const isEffect = ref(false);
 
@@ -120,6 +135,52 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (intervalId) clearInterval(intervalId);
 });
+
+//レベルアップ処理
+
+// ダミーデータ（実際はAPI等から取得）
+// ここではログイン日数を示す配列を使用
+const reports: [string, number][] = [
+  ["2025-06-01", 120],
+  ["2025-06-02", 150],
+  ["2025-06-03", 130],
+  ["2025-06-04", 160],
+  ["2025-06-05", 140],
+  ["2025-06-06", 170],
+  ["2025-06-07", 180],
+  ["2025-06-08", 200],
+  ["2025-06-09", 190],
+  ["2025-06-10", 210],
+];
+
+// レベルの閾値（指数関数的に設定）
+const levelThresholds = [
+  1, 1, 2, 4, 7, 12, 20, 34, 57, 95, 158, 262, 435, 723, 1199,
+];
+
+// レベルアップ時に呼び出す関数
+function announce_level_up(newLevel: number) {
+  console.log(`🎉 レベルアップ！新しいレベル: ${newLevel}`);
+}
+
+// メイン処理
+function processReports(reports: [string, number][]) {
+  const loginDays = reports.length;
+
+  // ログイン日数がレベルアップの閾値を超える最大レベルを計算
+  let newLevel = 1;
+  for (let i = 0; i < levelThresholds.length; i++) {
+    if (loginDays >= levelThresholds[i]) {
+      newLevel = i + 1;
+    } else {
+      break;
+    }
+  }
+  user_level.value = newLevel;
+  if (newLevel > user_level.value) {
+    announce_level_up(newLevel);
+  }
+}
 </script>
 
 <style scoped>
