@@ -217,8 +217,8 @@ async function submit() {
   //   },
   // };
   console.log(response);
-  efData.value = response.data.items;
-  assessment.value = response.data.assessment;
+  efData.value = response.data.assessments.items;
+  assessment.value = response.data.assessments.assessment;
 }
 
 async function save() {

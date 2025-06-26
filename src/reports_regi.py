@@ -52,14 +52,19 @@ class Report(BaseModel):
     tasks: List[str] 
 
 class ReportResponse(BaseModel):
+    
+    start_time: List[str]  # タスクの開始時間のリスト
+    successes: str  # 成功したタスクの説明
+    failures: str  # 失敗したタスクの説明
+    assessments: dict  # レポートの詳細データ
 
-    user_id: int
-    report_id: int
-    start_time: List[str]
-    # endTime: List[str]
-    successes: str
-    failures : str
-    tasks: List[str]
+    # user_id: int
+    # report_id: int
+    # start_time: List[str]
+    # # endTime: List[str]
+    # successes: str
+    # failures : str
+    # tasks: List[str]
 
 class tasksModel(Base):
     __tablename__ = "tasks"
@@ -125,7 +130,11 @@ def registor_report(user_id: int, day: datetime,
     db_session.commit()
     db_session.refresh(db_review)
     print("db_review", db_review)
-    return {
+    return ReportResponse(
+            start_time=report.start_time,
+            successes=report.successes,
+            failures=report.failures,
+            assessments = {
                 "items": [
                     { "EF_item": "自己管理", "score": 10, "total_score": 10 },
                     { "EF_item": "注意力", "score": -10, "total_score": 8 },
@@ -135,7 +144,7 @@ def registor_report(user_id: int, day: datetime,
                 ],
                 "assessment":
                     "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。",
-            }  
+            })  
     # return ReportResponse(user_id=user_id, 
     #                         report_id=db_repo.report_id, 
     #                         startTime=report.start_time, 
