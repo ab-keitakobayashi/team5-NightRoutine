@@ -7,8 +7,8 @@ import ProfileView from "../views/ProfileView.vue";
 import SummaryView from "../views/Summary.vue";
 
 const routes = [
-  { path: "/", component: HomeView },
-  { path: `/show/:inputdate`, component: HomeView ,props : true},
+  { path: "/", component: HomeView ,props : false},
+  { path: `/reports/show/:inputdate`, component: HomeView ,props : true},
   { path: "/login", component: LoginView },
   { path: "/reports/calender", component: Calendar },
   { path: "/reports/EF", component: EFView },
