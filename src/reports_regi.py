@@ -57,7 +57,7 @@ class ReportResponse(BaseModel):
     successes: str  # 成功したタスクの説明
     failures: str  # 失敗したタスクの説明
     assessments: dict  # レポートの詳細データ
-
+    tasks: List[str]  # タスクの説明
     # user_id: int
     # report_id: int
     # start_time: List[str]
@@ -156,13 +156,13 @@ def registor_report(user_id: int, day: datetime,
 #レビューを更新
 @app.put("/report/regi/{user_id}/{day}/update")
 def update_report(user_id: int, day: datetime, report: Report, db: Session = Depends(get_db)):
-    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).all()
     
     if not db_repo:
         print("db_repo not found")
         raise HTTPException(status_code=404, detail="Report not found")
 
-    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
     if not db_tasks:
         raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
 
@@ -171,7 +171,7 @@ def update_report(user_id: int, day: datetime, report: Report, db: Session = Dep
     db.commit()
     db.refresh(db_tasks)
 
-    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
+    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).all()
     if not db_review:
         raise HTTPException(status_code=404, detail="Review not found")
 
@@ -186,7 +186,7 @@ def update_report(user_id: int, day: datetime, report: Report, db: Session = Dep
 #レビューを削除
 @app.patch("/report/regi/{user_id}/{day}/delete")
 def update_report(user_id: int, day: datetime, db: Session = Depends(get_db)):
-    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).all()
     
     if not db_repo:
         print("db_repo not found")
@@ -200,13 +200,17 @@ def update_report(user_id: int, day: datetime, db: Session = Depends(get_db)):
 #レビューを取得
 @app.post("/report/{user_id}/{day}/get")
 def get_report(user_id: int, day: datetime,  db: Session = Depends(get_db)):
+    print("now finding")
     db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
-    
+    print("now finded")
+    print(db_repo.report_id)
+
     if not db_repo:
         print("db_repo not found")
         raise HTTPException(status_code=404, detail="Report not found")
 
-    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
+    print("db_tasks", db_tasks)
     if not db_tasks:
         raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
 
@@ -215,18 +219,32 @@ def get_report(user_id: int, day: datetime,  db: Session = Depends(get_db)):
     if not db_review:
         raise HTTPException(status_code=404, detail="Review not found")
 
+    start_times = [task.start_time for task in db_tasks]
+    print(start_times)
+    print(db_review.successes)
+    print(db_review.failures)
 
-    return ReportResponse(user_id=user_id, 
-                        report_id=db_repo.report_id, 
-                        startTime=db_tasks.start_time, 
-                        successes=db_review.successes, 
-                        failures=db_review.failures,
-                        tasks=db_tasks.task_description)  
-
+    return ReportResponse(
+            start_time=start_times,
+            successes=db_review.successes,
+            failures=db_review.failures,
+            tasks=[task.task_description for task in db_tasks],
+            assessments = {
+                "items": [
+                    { "EF_item": "自己管理", "score": 10, "total_score": 10 },
+                    { "EF_item": "注意力", "score": -10, "total_score": 8 },
+                    { "EF_item": "感情制御", "score": -10, "total_score": 9 },
+                    { "EF_item": "計画性", "score": 10, "total_score": 7 },
+                    { "EF_item": "柔軟性", "score": 10, "total_score": 12 },
+                ],
+                "assessment":
+                    "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。",
+            })
+    
 #レビューを一時保存
 @app.post("/report/{user_id}/{day}/save")
 def save_report(user_id: int, day: datetime, report: Report, db_session: Session = Depends(get_db)):
-    db_repo = db_session.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    db_repo = db_session.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).all()
 
     if not db_repo:
 
@@ -255,9 +273,9 @@ def save_report(user_id: int, day: datetime, report: Report, db_session: Session
         db_session.add(db_review)
         db_session.commit()
         db_session.refresh(db_review)
-        db_tasks = db_session.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+        db_tasks = db_session.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
     else:
-        db_tasks = db_session.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).first()
+        db_tasks = db_session.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
         if not db_tasks:
             raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
 
@@ -266,7 +284,7 @@ def save_report(user_id: int, day: datetime, report: Report, db_session: Session
         db_session.commit()
         db_session.refresh(db_tasks)
 
-        db_review = db_session.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
+        db_review = db_session.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).all()
         if not db_review:
             raise HTTPException(status_code=404, detail="Review not found")
 
