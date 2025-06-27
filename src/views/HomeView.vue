@@ -63,8 +63,9 @@
         auto-grow
         outlined
       ></v-textarea>
-      <v-btn @click="save" class="text-black ma-5"> 一時保存 </v-btn>
-      <v-btn @click="submit" class="text-black ma-5"> 送信 </v-btn>
+    <v-btn @click="save" class="text-black ma-5"> 一時保存 </v-btn>
+    <v-btn v-if="isResubmit" @click="re_submit" class="text-black ma-5">再送信</v-btn>
+    <v-btn v-else @click="submit" class="text-black ma-5">送信</v-btn>
     </v-col>
     <v-col cols="4">
       <p>AI評価</p>
@@ -121,11 +122,15 @@ const props = defineProps(['inputdate']);
 // 画面表示時とinputdateが変わった時にgetを呼ぶ
 console.log(`inputdate: ${props.inputdate}`);
 
+const isResubmit = ref(false);
+
 watch(
   () => props.inputdate,
   (newVal) => {
     if (newVal) {
       get(newVal);
+      day.value = props.inputdate;
+      isResubmit.value = true; // 再送信ボタンに切り替え
     }
   },
   { immediate: true }
@@ -231,6 +236,54 @@ async function submit() {
   assessment.value = response.data.assessment.assessment;
 }
 
+
+async function re_submit() {
+  
+  console.log(tasks.value);
+  console.log(`http://127.0.0.1:8000/report/${userID.value}/${day.value}/update`)
+
+  // tasksをProxy(Array)型からList型（通常の配列）に変換
+  const tasksList = Array.isArray(tasks.value) ? [...tasks.value] : [];
+  
+  const check = {
+    start_time: timeSlots.value,
+    // end_time: endTime.value,
+    successes: successes.value,
+    failures: failures.value,
+    tasks: tasksList,
+  };
+
+  console.log(check);
+
+  const response = await axios.post(
+    `http://127.0.0.1:8000/report/${userID.value}/${day.value}/regi`,
+    {
+      start_time: timeSlots.value,
+      successes: successes.value,
+      failures: failures.value,
+      tasks: tasksList,
+    }
+  )
+  console.log("response", response);
+  //efDataの整形
+  const ids = [
+    ...(response.data.assessment.ef_plus_points || []),
+    ...(response.data.assessment.ef_minus_points || [])
+  ];
+  const uniqueIds = [...new Set(ids)];
+
+  // efDataを生成
+  efData.value = uniqueIds.map(id => {
+    let score = 0;
+    if ((response.data.assessment.ef_plus_points || []).includes(id)) score += 1;
+    if ((response.data.assessment.ef_minus_points || []).includes(id)) score -= 1;
+    return { EF_item: id, score };
+  });
+  console.log(response);
+  assessment.value = response.data.assessment.assessment;
+}
+
+
 async function save() {
   // 一時保存処理を実装
   try {
@@ -277,8 +330,24 @@ async function get(inputdate) {
   tasks.value = response.data.tasks 
   successes.value = response.data.successes;
   failures.value = response.data.failures;  
-  efData.value = response.data.assessments.items;
-  assessment.value = response.data.assessments.assessment;
+
+  const ids = [
+    ...(response.data.assessment.ef_plus_points || []),
+    ...(response.data.assessment.ef_minus_points || [])
+  ];
+  const uniqueIds = [...new Set(ids)];
+
+  // efDataを生成
+  efData.value = uniqueIds.map(id => {
+    let score = 0;
+    if ((response.data.assessment.ef_plus_points || []).includes(id)) score += 1;
+    if ((response.data.assessment.ef_minus_points || []).includes(id)) score -= 1;
+    return { EF_item: id, score };
+  });
+
+  assessment.value = response.data.assessment.assessment;
 }
+
+
 
 </script>
