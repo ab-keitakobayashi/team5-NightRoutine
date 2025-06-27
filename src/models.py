@@ -51,6 +51,7 @@ class ReportResponse(BaseModel):
     successes: str  # 成功したタスクの説明
     failures: str  # 失敗したタスクの説明
     tasks: List[str]  # タスクの説明
+    assessment: dict
 
 class ReportRegiResponse(BaseModel):
     
@@ -143,7 +144,16 @@ class UserResiResponse(BaseModel):
     ef_item_id_4: Optional[int]
     ef_item_id_5: Optional[int]
 
- 
+
+
+class ScoresModel(Base):
+    __tablename__ = "scores"
+
+    score_id = Column(Integer, primary_key=True, autoincrement=True)
+    score = Column(Integer, nullable=False)
+    ef_item_id = Column(Integer, nullable=False)
+    report_id = Column(Integer, nullable=False)
+
  
 class EfModel(Base):
     __tablename__ = "ef_items" # テーブル名
