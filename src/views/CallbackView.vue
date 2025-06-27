@@ -17,7 +17,10 @@ const router = useRouter();
 const route = useRoute();
 onMounted(async () => {
   const token = route.query.code;
-  if (!token) return;
+  if (!token) {
+    router.push("/login");
+    return;
+  }
 
   const clientId = "4qfsnitgm7uc023mv5icdq04i0";
   const redirectUri = "http://localhost:5173/callback";
@@ -46,6 +49,7 @@ onMounted(async () => {
     const userId = userInfo.sub ?? "";
 
     localStorage.setItem("user_email", email);
+    localStorage.setItem("user_id", userId);
 
     router.push("/");
     console.log("メールアドレス", email);

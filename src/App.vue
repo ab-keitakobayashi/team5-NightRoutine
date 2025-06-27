@@ -15,6 +15,7 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn text to="/login">Login</v-btn>
+      <v-btn text @click="logout" v-if="userId">ログアウト</v-btn>
     </v-app-bar>
 
     <v-main class="full-width bg-grey-darken-4">
@@ -27,14 +28,32 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 const email = ref<string | null>(null);
+const userId = ref<string | null>(null);
+const router = useRouter();
+
+// ログアウト処理
+function logout() {
+  localStorage.removeItem("user_email");
+  localStorage.removeItem("user_id");
+  email.value = null;
+  userId.value = null;
+  router.push("/login");
+}
 
 onMounted(() => {
   email.value = localStorage.getItem("user_email");
+  userId.value = localStorage.getItem("user_id");
+
   // ストレージ変更イベントにも対応（他タブや動的変更時）
   window.addEventListener("storage", () => {
     email.value = localStorage.getItem("user_email");
+    userId.value = localStorage.getItem("user_id");
+    if (!userId.value) {
+      router.push("/login");
+    }
   });
 });
 </script>
