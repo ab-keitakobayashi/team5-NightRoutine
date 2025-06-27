@@ -22,7 +22,7 @@ class ScoresModel(Base):
 class ReportsModel(Base):
     __tablename__ = "reports"
     report_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, nullable=False)
+    user_id = Column(String, nullable=False)
     write_date = Column(Date, nullable=False)
     is_deleted = Column(Boolean, default=False)
 
@@ -33,7 +33,7 @@ class EfScoreSummary(BaseModel):
 
 app = FastAPI()
 @app.get("/user/{user_id}/ef_scores", response_model=List[EfScoreSummary])
-def get_ef_score_summary(user_id: int, db: Session = Depends(get_db)):
+def get_ef_score_summary(user_id: str, db: Session = Depends(get_db)):
     # 削除されていないレポートを取得
     reports = db.query(ReportsModel).filter(
         ReportsModel.user_id == user_id,

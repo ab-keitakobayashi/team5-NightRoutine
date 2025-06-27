@@ -27,28 +27,28 @@ app.add_middleware(
 from db_connect import get_db  # データベースセッション取得関数を用意してください
 
 @app.post("/report/{user_id}/{day}/regi")
-def Report_regi(user_id: int, day: datetime, report: Report, db_session: Session = Depends(get_db)):
+def Report_regi(user_id: str, day: datetime, report: Report, db_session: Session = Depends(get_db)):
     return registor_report(user_id, day, report, db_session)
 
 #レビューを更新
 @app.put("/report/regi/{user_id}/{day}/update")
-def Update_report(user_id: int, day: datetime, report: Report, db: Session = Depends(get_db)):
+def Update_report(user_id: str, day: datetime, report: Report, db: Session = Depends(get_db)):
     return update_report(user_id, day, report, db)
 
 @app.post("/report/{user_id}/{day}/get")
-def Get_report(user_id: int, day: datetime,  db: Session = Depends(get_db)):
+def Get_report(user_id: str, day: datetime,  db: Session = Depends(get_db)):
     return get_report(user_id, day, db)
 
 
 #レビューを一時保存
 @app.post("/report/{user_id}/{day}/save")
-def Save_report(user_id: int, day: datetime, report: Report, db_session: Session = Depends(get_db)):
+def Save_report(user_id: str, day: datetime, report: Report, db_session: Session = Depends(get_db)):
     return save_report(user_id, day, report, db_session)
 
 #アセスメント生成AI
 @app.post("/user/{user_id}/assessment", response_model=GenAsseResponse)
 def Genasssessment(
-    user_id: int,
+    user_id: str,
     request: GenAssessmentRequest,
     db_session: Session = Depends(get_db)
 ):
@@ -61,9 +61,9 @@ def Create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
 
 
 @app.put("/user/update/{user_id}", response_model=dict)
-def Update_user_profile(user_id: int, request: UserUpdateRequest, db: Session = Depends(get_db)):
+def Update_user_profile(user_id: str, request: UserUpdateRequest, db: Session = Depends(get_db)):
     return update_user_profile(user_id, request, db)
 
 @app.post("/user/{user_id}/reviews/")
-def Post_reviews_and_advice(user_id: int, request: SummaryRequest, db: Session = Depends(get_db)):
+def Post_reviews_and_advice(user_id: str, request: SummaryRequest, db: Session = Depends(get_db)):
     return post_reviews_and_advice(user_id, request, db)

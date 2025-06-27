@@ -130,7 +130,7 @@ class UserResiRequest(BaseModel):
 
 
 class UserResiResponse(BaseModel):
-    id: int
+    user_id: str
     name: str
     class_id: int
     period: int
