@@ -43,26 +43,26 @@ app.add_middleware(
 #     ef_item_id_4: int
 #     ef_item_id_5: int
 
-class UserResiRequest(BaseModel):
-    name: str
-    class_id: int
-    period: int
-    ef_item_id_array: list[int]  # Changed to a list for flexibility
+# class UserResiRequest(BaseModel):
+#     name: str
+#     class_id: int
+#     period: int
+#     ef_item_id_array: list[int]  # Changed to a list for flexibility
 
 
-class UserResiResponse(BaseModel):
-    id: int
-    name: str
-    class_id: int
-    period: int
-    avatar_id: int
-    enemy_id: int
-    enemy_hp: int
-    ef_item_id_1: int
-    ef_item_id_2: int
-    ef_item_id_3: int
-    ef_item_id_4: int
-    ef_item_id_5: int
+# class UserResiResponse(BaseModel):
+#     id: int
+#     name: str
+#     class_id: int
+#     period: int
+#     avatar_id: int
+#     enemy_id: int
+#     enemy_hp: int
+#     ef_item_id_1: int
+#     ef_item_id_2: int
+#     ef_item_id_3: int
+#     ef_item_id_4: int
+#     ef_item_id_5: int
 
 @app.post("/user/regi", response_model=UserResiResponse)
 def create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
