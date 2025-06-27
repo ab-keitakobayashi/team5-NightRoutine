@@ -1,6 +1,6 @@
 from fastapi import FastAPI,APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from models import  ReportResponse# Userモデル
+from models import  EfModel,ReportResponse,ReportRegiResponse, Report, User, ReportsModel,tasksModel,ReviewsModel,Review # Userモデル
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime,ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from db_connect import get_db
 from datetime import datetime
 from typing import List
+import requests
 """
 DB接続設定とモデル定義
 """
@@ -16,7 +17,6 @@ DB接続設定とモデル定義
 router = APIRouter()
 app = FastAPI()
 Base = declarative_base()
-
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
@@ -27,77 +27,138 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class User(Base):
-    __tablename__ = "testusers"
+# class User(Base):
+#     __tablename__ = "testusers"
 
-    user_id = Column(Integer, primary_key=True, index=True)
-    user_name = Column(String, nullable=False)
-    user_mailAddress = Column(String, unique=True, nullable=False)
-    class_id = Column(Integer, nullable=False)
-    period = Column(Integer, nullable=False)
-    avatar_id = Column(Integer, nullable=False)
-    enemy_id = Column(Integer, nullable=False)
-    enemy_hp = Column(Integer, nullable=False)
-    ef_item_id_1 = Column(Integer, nullable=False)
-    ef_item_id_2 = Column(Integer, nullable=False)
-    ef_item_id_3 = Column(Integer, nullable=False)
-    ef_item_id_4 = Column(Integer, nullable=False)
-    ef_item_id_5 = Column(Integer, nullable=False)
+#     user_id = Column(Integer, primary_key=True, index=True)
+#     user_name = Column(String, nullable=False)
+#     user_mailAddress = Column(String, unique=True, nullable=False)
+#     class_id = Column(Integer, nullable=False)
+#     period = Column(Integer, nullable=False)
+#     avatar_id = Column(Integer, nullable=False)
+#     enemy_id = Column(Integer, nullable=False)
+#     enemy_hp = Column(Integer, nullable=False)
+#     ef_item_id_1 = Column(Integer, nullable=False)
+#     ef_item_id_2 = Column(Integer, nullable=False)
+#     ef_item_id_3 = Column(Integer, nullable=False)
+#     ef_item_id_4 = Column(Integer, nullable=False)
+#     ef_item_id_5 = Column(Integer, nullable=False)
 
-class Report(BaseModel):
-    start_time: List[str]
-    # endTime: List[str]
-    successes: str
-    failures: str
-    tasks: List[str] 
+# class Report(BaseModel):
+#     start_time: List[str]
+#     # endTime: List[str]
+#     successes: str
+#     failures: str
+#     tasks: List[str] 
 
-class ReportResponse(BaseModel):
+# class ReportResponse(BaseModel):
     
-    start_time: List[str]  # タスクの開始時間のリスト
-    successes: str  # 成功したタスクの説明
-    failures: str  # 失敗したタスクの説明
-    assessments: dict  # レポートの詳細データ
-    tasks: List[str]  # タスクの説明
-    # user_id: int
-    # report_id: int
-    # start_time: List[str]
-    # # endTime: List[str]
-    # successes: str
-    # failures : str
-    # tasks: List[str]
+#     start_time: List[str]  # タスクの開始時間のリスト
+#     successes: str  # 成功したタスクの説明
+#     failures: str  # 失敗したタスクの説明
+#     assessments_points: dict  # レポートの詳細データ
+#     assessment: str
+#     tasks: List[str]  # タスクの説明
+#     # user_id: int
+#     # report_id: int
+#     # start_time: List[str]
+#     # # endTime: List[str]
+#     # successes: str
+#     # failures : str
+#     # tasks: List[str]
 
-class tasksModel(Base):
-    __tablename__ = "tasks"
+# class tasksModel(Base):
+#     __tablename__ = "tasks"
 
-    task_id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer,  unique= True,nullable=True)#ForeignKey('reports.report_id'))
-    start_time = Column(String, nullable=False)
-    task_description = Column(String, nullable=False)
+#     task_id = Column(Integer, primary_key=True, index=True)
+#     report_id = Column(Integer,  unique= True,nullable=True)#ForeignKey('reports.report_id'))
+#     start_time = Column(String, nullable=False)
+#     task_description = Column(String, nullable=False)
+
+# class Ef_Items(Base):
+#     __tablename__ = "ef_items"
+
+#     ef_item_id = Column(Integer, primary_key=True, index=True)
+#     ef_category_id = Column(Integer, nullable=False)
+#     class_id = Column(Integer, nullable=False)
+#     item = Column(String, nullable=False)
+
+# class ReviewsModel(Base):
+#     __tablename__ = "reviews"
+
+#     review_id = Column(Integer, primary_key=True, index=True)
+#     report_id = Column(Integer, unique= True,nullable=True)#
+#     successes = Column(String, nullable=False)
+#     failures = Column(String, nullable=False)
+#     ai_comment = Column(String, nullable=False)
 
 
-class ReviewsModel(Base):
-    __tablename__ = "reviews"
+# class ReportsModel(Base):
+#     __tablename__ = "reports"
 
-    review_id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer, unique= True,nullable=True)#
-    successes = Column(String, nullable=False)
-    failures = Column(String, nullable=False)
-    ai_comment = Column(String, nullable=False)
+#     user_id = Column(Integer, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
+#     report_id = Column(Integer, primary_key=True, index=False)
+#     write_date = Column(DateTime, default=datetime, nullable=False)
+#     is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み   
 
-Base = declarative_base()
-class ReportsModel(Base):
-    __tablename__ = "reports"
 
-    user_id = Column(Integer, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
-    report_id = Column(Integer, primary_key=True, index=False)
-    write_date = Column(DateTime, default=datetime, nullable=False)
-    is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み   
+# bedrock生成文を取得
+def get_assessment_url(user_id: int, payload: dict = None) -> dict:
+    """
+    指定したユーザーIDに対して、JSON形式のデータをPOSTし、評価情報を取得します。
+    payload: dict型で渡すデータ（例: {"key": "value"}）
+    """
+    url = f"http://127.0.0.1:8000/user/{user_id}/assessment"
+    if payload is None:
+        payload = {}
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        data = response.json()
+        print("data-------------",data)
+        return {
+            "ef_plus_points": data.get('ef_plus_points'),
+            "ef_minus_points": data.get('ef_minus_points'),
+            "assessment": data.get('assessment'),
+        }
+    else:
+        raise HTTPException(status_code=response.status_code, detail="Failed to get assessment")
 
+# アセスメントのデータ成型
+def generate_assessments_points(output_assessments):
+    assessments_points = []
+    for ef_id in output_assessments.get("ef_plus_points", []):
+        assessments_points.append({"EF_id": ef_id, "score": 1})
+    for ef_id in output_assessments.get("ef_minus_points", []):
+        assessments_points.append({"EF_id": ef_id, "score": -1})
+    return assessments_points
+
+
+def replace_ef_id_with_item(assessments_points, db_session):
+    result = []
+    for ap in assessments_points:
+        ef_item = db_session.query(EfModel).filter(EfModel.ef_item_id == ap['EF_id']).first()
+        if ef_item:
+            # 例: ef_item.ef_item_name を使う場合
+            result.append({'item': ef_item.item, 'score': ap['score']})
+        else:
+            # 見つからない場合はそのままEF_idを使うなど
+            result.append({'item': ap['EF_id'], 'score': ap['score']})
+    return result
 
 # # ④itemを追加（サンプル実装済み）
 @app.post("/report/{user_id}/{day}/regi")#, response_model=ReportResponse)
 def registor_report(user_id: int, day: datetime, 
                     report: Report, db_session: Session = Depends(get_db)): 
+    reportdata = {
+            "start_time": report.start_time,
+            "task_description": report.tasks,
+            "success": report.successes,
+            "failure": report.failures
+        }
+    
+    output_assessments = get_assessment_url(user_id, reportdata)
+    assessments_points = generate_assessments_points(output_assessments)
+    assessments_points = replace_ef_id_with_item(assessments_points, db_session)
 
     db_repo = ReportsModel(user_id = user_id, 
                            write_date = day, 
@@ -130,29 +191,13 @@ def registor_report(user_id: int, day: datetime,
     db_session.commit()
     db_session.refresh(db_review)
     print("db_review", db_review)
-    return ReportResponse(
+    return ReportRegiResponse(
             start_time=report.start_time,
             successes=report.successes,
             failures=report.failures,
-            assessments = {
-                "items": [
-                    { "EF_item": "自己管理", "score": 10, "total_score": 10 },
-                    { "EF_item": "注意力", "score": -10, "total_score": 8 },
-                    { "EF_item": "感情制御", "score": -10, "total_score": 9 },
-                    { "EF_item": "計画性", "score": 10, "total_score": 7 },
-                    { "EF_item": "柔軟性", "score": 10, "total_score": 12 },
-                ],
-                "assessment":
-                    "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。",
-            })  
-    # return ReportResponse(user_id=user_id, 
-    #                         report_id=db_repo.report_id, 
-    #                         startTime=report.start_time, 
-    #                         endTime=report.endTime, 
-    #                         successes=report.successes, 
-    #                         failures=report.failures,
-    #                         tasks=report.tasks)  
-
+            assessment=output_assessments
+            )  
+    
 #レビューを更新
 @app.put("/report/regi/{user_id}/{day}/update")
 def update_report(user_id: int, day: datetime, report: Report, db: Session = Depends(get_db)):

@@ -91,7 +91,7 @@ class GenAssessmentRequest(BaseModel):
 class GenAsseResponse(BaseModel):
     ef_plus_points: list[int]  # EF項目のIDのリスト
     ef_minus_points: list[int]  # マイナスEF項目のIDのリスト
-    assesment: str  # AIからのアドバイス
+    assessment: str  # AIからのアドバイス
     
 # FastAPIアプリケーションのインスタンスを作成
 app = FastAPI()
@@ -184,7 +184,7 @@ def get_efPoint_from_bedrock(ef_items_all: list[EfModel], start_times: list[str]
     answer = [int(x) for x in answer.split() if x.isdigit()]
     return answer
 
-# Bedrockを使用してEFとユーザー入力をもとにAssesmentを出力する
+# Bedrockを使用してEFとユーザー入力をもとにassessmentを出力する
 def get_efAssement_from_bedrock(ef_items_all: list[EfModel], start_times: list[str], task_descriptions: list[str], success: str, failure: str) -> str:
     client = boto3.client(
         'bedrock-runtime',
@@ -227,7 +227,7 @@ def get_efAssement_from_bedrock(ef_items_all: list[EfModel], start_times: list[s
     answer = response_body["content"][0]["text"]
     return answer
 
-@app.post("/user/{user_id}/assesment", response_model=GenAsseResponse)
+@app.post("/user/{user_id}/assessment", response_model=GenAsseResponse)
 def genasssessment(
     user_id: int,
     request: GenAssessmentRequest,
@@ -247,9 +247,9 @@ def genasssessment(
     ef_plus_points = get_efPoint_from_bedrock(ef_items_all, request.start_time, request.task_description, request.success, True)
     ef_minus_points = get_efPoint_from_bedrock(ef_items_all, request.start_time, request.task_description, request.failure, False)
     # EF項目のリストを返す
-    assesment = get_efAssement_from_bedrock(ef_items_all, request.start_time, request.task_description, request.success, request.failure)
+    assessment = get_efAssement_from_bedrock(ef_items_all, request.start_time, request.task_description, request.success, request.failure)
     return GenAsseResponse(
         ef_plus_points=ef_plus_points,
         ef_minus_points=ef_minus_points,
-        assesment=assesment
+        assessment=assessment
     )
