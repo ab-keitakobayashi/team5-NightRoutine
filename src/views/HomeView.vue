@@ -73,14 +73,12 @@
           <tr>
             <th>EF項目</th>
             <th>増減ポイント</th>
-            <th>合計ポイント</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(item, idx) in efData" :key="idx">
             <td>{{ item.EF_item }}</td>
             <td>{{ item.score }}</td>
-            <td>{{ item.total_score }}</td>
           </tr>
         </tbody>
       </v-table>
@@ -182,6 +180,7 @@ function autoFillTask(idx) {
 // ダミーデータ
 const efData = ref([]);
 
+
 async function submit() {
   // 送信処理を実装
 
@@ -212,10 +211,24 @@ async function submit() {
       tasks: tasksList,
     }
   )
+  console.log("response", response);
+  //efDataの整形
+  const ids = [
+    ...(response.data.assessment.ef_plus_points || []),
+    ...(response.data.assessment.ef_minus_points || [])
+  ];
+  const uniqueIds = [...new Set(ids)];
 
+  // efDataを生成
+  efData.value = uniqueIds.map(id => {
+    let score = 0;
+    if ((response.data.assessment.ef_plus_points || []).includes(id)) score += 1;
+    if ((response.data.assessment.ef_minus_points || []).includes(id)) score -= 1;
+    return { EF_item: id, score };
+  });
   console.log(response);
-  efData.value = response.data.assessments.items;
-  assessment.value = response.data.assessments.assessment;
+  // efData.value = response.data.assessments.items;
+  assessment.value = response.data.assessment.assessment;
 }
 
 async function save() {
