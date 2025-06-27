@@ -10,6 +10,8 @@ npm install v-calendar@next @popperjs/core
 
 npm install @mdi/font
 
+npm install jwt-decode
+
 npm run dev
 
 # saaya 用 git hub のうれしいコマンド

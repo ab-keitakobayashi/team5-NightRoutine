@@ -5,15 +5,17 @@ import Calendar from "../views/Calendar.vue";
 import EFView from "../views/EFView.vue";
 import ProfileView from "../views/ProfileView.vue";
 import SummaryView from "../views/Summary.vue";
+import CallbackView from "../views/CallbackView.vue";
 
 const routes = [
-  { path: "/", component: HomeView ,props : false},
-  { path: `/reports/show/:inputdate`, component: HomeView ,props : true},
+  { path: "/", component: HomeView, props: false },
+  { path: `/reports/show/:inputdate`, component: HomeView, props: true },
   { path: "/login", component: LoginView },
   { path: "/reports/calender", component: Calendar },
   { path: "/reports/EF", component: EFView },
   { path: "/users", component: ProfileView },
-  { path: "/summary", component: SummaryView }
+  { path: "/summary", component: SummaryView },
+  { path: `/callback`, component: CallbackView },
 ];
 
 const router = createRouter({
