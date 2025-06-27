@@ -26,6 +26,16 @@ const router = createRouter({
 // ★ここからガードを追加
 router.beforeEach((to, from, next) => {
   const userId = localStorage.getItem("user_id");
+  // ルートパスにアクセスされた場合、今日の日付でリダイレクト
+  if (to.path === "/") {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    next(`/reports/show/${dateStr}`);
+    return;
+  }
   // 未ログイン時は /login と /callback 以外にアクセスできない
   if (!userId && to.path !== "/login" && to.path !== "/callback") {
     next("/login");
