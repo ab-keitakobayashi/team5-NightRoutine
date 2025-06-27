@@ -23,7 +23,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "testusers"
 
-    user_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, primary_key=True, index=True)
     user_name = Column(String, nullable=False)
     user_mailAddress = Column(String, unique=True, nullable=False)
     class_id = Column(Integer, nullable=False)
@@ -99,7 +99,7 @@ class ReviewsModel(Base):
 class ReportsModel(Base):
     __tablename__ = "reports"
 
-    user_id = Column(Integer, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
+    user_id = Column(String, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
     report_id = Column(Integer, primary_key=True, index=False)
     write_date = Column(DateTime, default=datetime, nullable=False)
     is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み   
