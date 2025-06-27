@@ -148,7 +148,6 @@ class UserResiResponse(BaseModel):
 
 class ScoresModel(Base):
     __tablename__ = "scores"
-
     score_id = Column(Integer, primary_key=True, autoincrement=True)
     score = Column(Integer, nullable=False)
     ef_item_id = Column(Integer, nullable=False)
