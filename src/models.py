@@ -182,3 +182,19 @@ class GenAsseResponse(BaseModel):
     ef_minus_points: list[int]  # マイナスEF項目のIDのリスト
     assessment: str  # AIからのアドバイス
    
+
+# --- SQLAlchemy Models ---
+
+
+
+# --- Pydantic Models ---
+class SummaryRequest(BaseModel):
+    start_date: datetime
+    end_date: datetime
+
+class ef_items_data(BaseModel):
+    ef_item_id: int
+    item: str
+
+class reviews_aicomment_data(BaseModel):
+    ai_comment: str
