@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from typing import List
+from typing import Optional
 # """
 # DB接続設定とモデル定義
 # """
@@ -136,11 +137,11 @@ class UserResiResponse(BaseModel):
     avatar_id: int
     enemy_id: int
     enemy_hp: int
-    ef_item_id_1: int
-    ef_item_id_2: int
-    ef_item_id_3: int
-    ef_item_id_4: int
-    ef_item_id_5: int
+    ef_item_id_1: Optional[int]
+    ef_item_id_2: Optional[int]
+    ef_item_id_3: Optional[int]
+    ef_item_id_4: Optional[int]
+    ef_item_id_5: Optional[int]
 
  
  
