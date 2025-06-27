@@ -14,7 +14,7 @@
 
           <v-dialog v-model="dateDialog" persistent width="290">
             <v-card>
-              <v-date-picker v-model="date" :max="maxDate"></v-date-picker>
+              <v-date-picker v-model="startDate" :max="maxDate"></v-date-picker>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" text @click="setDateTime">決定</v-btn>
@@ -83,19 +83,18 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import axios from 'axios';
+const userID = ref('1'); // ユーザーIDを適宜設定  
 
 // 開始日時用
 const dateDialog = ref(false)
-const date = ref('Tue Jun 25 2025 00:00:00') // 初期値を設定
+// const date = ref('Tue Jun 20 2025 00:00:00') // 初期値を設定
 
-const startDate = ref("");
+const startDate = ref('2025-04-01');
 const startDateTimeDisplay = computed({
   get() {
-     console.log("startDateTimeDisplay called")
-     console.log("date:", date.value)
-    if (date.value ) {
-      console.log("startDateTimeDisplay:", date.value)
-      return `${formatDate(date.value)}`
+    if (startDate.value) {
+      return `${formatDate(startDate.value)}`
     }
     return ''
   },
@@ -105,23 +104,24 @@ const startDateTimeDisplay = computed({
 })
 
 function setDateTime() {
-    console.log("setDateTime called")
-    console.log("date:", date.value)
-  if (date.value) {
-    startDate.value = `${date.value}`
-    dateDialog.value = false
-    console.log(dateDialog.value)
+  if (startDate.value) {
+    // startDate.valueがDate型でなければDate型に変換
+    let d = typeof startDate.value === 'string' ? new Date(startDate.value) : startDate.value;
+    // "yyyy-mm-dd"形式の文字列に変換
+    const formatted = formatDate(d);
+    startDate.value = formatted;
+    dateDialog.value = false;
+    console.log(`開始日時が設定されました: ${startDate.value}`);
   }
 }
-
 // 終了日時用
 const endDateDialog = ref(false)
-const endDate = ref('Tue Jun 25 2025 00:00:00')
+const endDate = ref('2025-06-27'); // 初期値を設定
 
 const endDateTimeDisplay = computed({
   get() {
     if (endDate.value) {
-     return `${formatDate(endDate.value)}`
+      return `${formatDate(endDate.value)}`
     }
     return ''
   },
@@ -132,8 +132,13 @@ const endDateTimeDisplay = computed({
 
 function setEndDateTime() {
   if (endDate.value) {
-    endDate.value = `${endDate.value} `
-    endDateDialog.value = false
+    // endDate.valueがDate型でなければDate型に変換
+    let d = typeof endDate.value === 'string' ? new Date(endDate.value) : endDate.value;
+    // "yyyy-mm-dd"形式の文字列に変換
+    const formatted = formatDate(d);
+    endDate.value = formatted;
+    endDateDialog.value = false;
+    console.log(`終了日時が設定されました: ${endDate.value}`);
   }
 }
 
@@ -190,36 +195,36 @@ async function summary() {
 
     //responseにAPIからのデータが返ってくる
    const check = {
-        startDate: startDate.value,
-        endDate: endDate.value,
+        start_date: startDate.value,
+        end_date: endDate.value,
       }
 
     console.log(check);
     
-    // const response = await axios.post(
-    //   'endpoint/summary/{useID}',
-    //   {        
-    //     startTime: startTime.value,
-    //     endTime: endTime.value
-    //   }
-    // )
+    const response = await axios.post(
+      `http://127.0.0.1:8000/user/${userID.value}/reviews`,
+      {
+        start_date: startDate.value,
+        end_date: endDate.value
+      }
+    )
 
     // ダミーデータ
-    const response = {
-       data: {
-            items: [
-              { EF_item: "自己管理",  total_score: 10 },
-              { EF_item: "注意力",  total_score: 8 },
-              { EF_item: "感情制御", total_score: 9 },
-              { EF_item: "計画性",  total_score: 7 },
-              { EF_item: "柔軟性",  total_score: 12 }
-            ],
-            summary: "要約結果が返ってきました"
-      }
-      }
+    // const response = {
+    //    data: {
+    //         items: [
+    //           { EF_item: "自己管理",  total_score: 10 },
+    //           { EF_item: "注意力",  total_score: 8 },
+    //           { EF_item: "感情制御", total_score: 9 },
+    //           { EF_item: "計画性",  total_score: 7 },
+    //           { EF_item: "柔軟性",  total_score: 12 }
+    //         ],
+    //         summary: "要約結果が返ってきました"
+    //   }
+    //   }
 
-    efData.value = response.data.items;
-    assessment.value = response.data.summary;
+    // efData.value = response.data.items;
+    assessment.value = response.data.assessment;
 
 }
 

@@ -41,14 +41,20 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-
+import { useRouter } from "vue-router";
+const router = useRouter();
 const items = ref([]);
 const efData = ref([]);
 
 async function onDateClick(d) {
-  // ここにクリック時の処理を書く（例：アラート表示）
-  alert(`日付: ${d.date}`);
+  const dateObj = new Date(d.date);
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const dd = String(dateObj.getDate()).padStart(2, "0");
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+  router.push(`/reports/show/${dateStr}`);
 }
+
 async function show() {
   // const response = await axios.post(
   //   'endpoint/reports/EF/{useID}',

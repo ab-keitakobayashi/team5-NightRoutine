@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app color="black" dark>
-      <v-btn text to="/">振り返り記入</v-btn>
+      <v-btn text to="/">振り返り</v-btn>
       <v-btn text to="/reports/calender">カレンダー</v-btn>
       <v-btn text to="/summary">要約</v-btn>
       <v-btn text to="/reports/ef">EF一覧</v-btn>
@@ -16,6 +16,7 @@
       <v-spacer></v-spacer>
       <v-btn text to="/login">Login</v-btn>
     </v-app-bar>
+
     <v-main class="full-width bg-grey-darken-4">
       <v-container>
         <router-view />
@@ -24,7 +25,19 @@
   </v-app>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+const email = ref<string | null>(null);
+
+onMounted(() => {
+  email.value = localStorage.getItem("user_email");
+  // ストレージ変更イベントにも対応（他タブや動的変更時）
+  window.addEventListener("storage", () => {
+    email.value = localStorage.getItem("user_email");
+  });
+});
+</script>
 <style scoped>
 .full-width {
   padding-right: 0;

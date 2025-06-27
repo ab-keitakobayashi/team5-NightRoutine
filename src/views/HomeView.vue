@@ -73,14 +73,12 @@
           <tr>
             <th>EF項目</th>
             <th>増減ポイント</th>
-            <th>合計ポイント</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(item, idx) in efData" :key="idx">
             <td>{{ item.EF_item }}</td>
             <td>{{ item.score }}</td>
-            <td>{{ item.total_score }}</td>
           </tr>
         </tbody>
       </v-table>
@@ -100,6 +98,8 @@
 </template>
 
 <script setup>
+
+
 import { ref, computed, watch } from "vue";
 import axios from "axios";
 
@@ -110,9 +110,28 @@ const successes = ref("");
 const failures = ref("");
 const assessment = ref("");
 const item = ref({});
+const userID = ref(1); // ユーザーIDのダミー値
+// システムの現在の日付を"YYYY-MM-DD"形式で取得
+const day = ref(new Date().toISOString().slice(0, 10));
 
 // タスク内容
 const tasks = ref([]);
+const props = defineProps(['inputdate']);
+
+// 画面表示時とinputdateが変わった時にgetを呼ぶ
+console.log(`inputdate: ${props.inputdate}`);
+
+watch(
+  () => props.inputdate,
+  (newVal) => {
+    if (newVal) {
+      get(newVal);
+    }
+  },
+  { immediate: true }
+);
+
+
 
 // 30分ごとの時刻リストを生成
 const timeSlots = computed(() => {
@@ -159,56 +178,57 @@ function autoFillTask(idx) {
 }
 
 // ダミーデータ
-const efData = ref([
-  { EF_item: "自己管理", score: 1, total_score: 10 },
-  { EF_item: "注意力", score: -1, total_score: 8 },
-  { EF_item: "感情制御", score: -1, total_score: 9 },
-  { EF_item: "計画性", score: 1, total_score: 7 },
-  { EF_item: "柔軟性", score: 1, total_score: 12 },
-]);
+const efData = ref([]);
+
 
 async function submit() {
   // 送信処理を実装
 
-  //responseにAPIからのデータが返ってくる
+  //いったんtasksをフラットな配列に変換 今後どうするか考える
+  
+  console.log(tasks.value);
+  console.log(`http://127.0.0.1:8000/report/${userID.value}/${day.value}/regi`)
+
+  // tasksをProxy(Array)型からList型（通常の配列）に変換
+  const tasksList = Array.isArray(tasks.value) ? [...tasks.value] : [];
+  
   const check = {
-    startTime: startTime.value,
-    endTime: endTime.value,
+    start_time: timeSlots.value,
+    // end_time: endTime.value,
     successes: successes.value,
     failures: failures.value,
-    tasks: tasks.value,
+    tasks: tasksList,
   };
 
   console.log(check);
 
-  // const response = await axios.post(
-  //   'endpoint/{useID}',
-  //   {
-  //     startTime: startTime.value,
-  //     endTime: endTime.value,
-  //     successes: successes.value,
-  //     failures: failures.value,
-  //     tasks: tasks.value,
-  //   }
-  // )
+  const response = await axios.post(
+    `http://127.0.0.1:8000/report/${userID.value}/${day.value}/regi`,
+    {
+      start_time: timeSlots.value,
+      successes: successes.value,
+      failures: failures.value,
+      tasks: tasksList,
+    }
+  )
+  console.log("response", response);
+  //efDataの整形
+  const ids = [
+    ...(response.data.assessment.ef_plus_points || []),
+    ...(response.data.assessment.ef_minus_points || [])
+  ];
+  const uniqueIds = [...new Set(ids)];
 
-  // ダミーデータ
-  const response = {
-    data: {
-      items: [
-        { EF_item: "自己管理", score: 10, total_score: 10 },
-        { EF_item: "注意力", score: -10, total_score: 8 },
-        { EF_item: "感情制御", score: -10, total_score: 9 },
-        { EF_item: "計画性", score: 10, total_score: 7 },
-        { EF_item: "柔軟性", score: 10, total_score: 12 },
-      ],
-      assessment:
-        "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。",
-    },
-  };
-
-  efData.value = response.data.items;
-  assessment.value = response.data.assessment;
+  // efDataを生成
+  efData.value = uniqueIds.map(id => {
+    let score = 0;
+    if ((response.data.assessment.ef_plus_points || []).includes(id)) score += 1;
+    if ((response.data.assessment.ef_minus_points || []).includes(id)) score -= 1;
+    return { EF_item: id, score };
+  });
+  console.log(response);
+  // efData.value = response.data.assessments.items;
+  assessment.value = response.data.assessment.assessment;
 }
 
 async function save() {
@@ -243,4 +263,22 @@ async function save() {
     console.error("Error saving data:", error);
   }
 }
+
+
+async function get(inputdate) {
+
+  console.log(`http://127.0.0.1:8000/report/${userID.value}/${inputdate}/get`);
+  const response = await axios.post(
+    `http://127.0.0.1:8000/report/${userID.value}/${inputdate}/get`,
+  )
+
+  console.log(response);
+  timeSlots.value = response.data.start_time;
+  tasks.value = response.data.tasks 
+  successes.value = response.data.successes;
+  failures.value = response.data.failures;  
+  efData.value = response.data.assessments.items;
+  assessment.value = response.data.assessments.assessment;
+}
+
 </script>
