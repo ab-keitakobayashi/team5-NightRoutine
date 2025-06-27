@@ -23,4 +23,16 @@ const router = createRouter({
   routes,
 });
 
+// ★ここからガードを追加
+router.beforeEach((to, from, next) => {
+  const userId = localStorage.getItem("user_id");
+  // 未ログイン時は /login と /callback 以外にアクセスできない
+  if (!userId && to.path !== "/login" && to.path !== "/callback") {
+    next("/login");
+  } else {
+    next();
+  }
+});
+// ★ここまで
+
 export default router;
