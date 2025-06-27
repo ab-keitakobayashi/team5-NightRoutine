@@ -2,21 +2,21 @@ from fastapi import FastAPI ,Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from db_connect import get_db  # DBセッション取得関数
-from models import User  # Userモデル
+from models import User ,UserUpdateRequest # Userモデル
  
  
 app = FastAPI()
  
  
  
-class UserUpdateRequest(BaseModel):
-    class_id: int
-    period: int
-    ef_item_id_1: int
-    ef_item_id_2: int
-    ef_item_id_3: int
-    ef_item_id_4: int
-    ef_item_id_5: int
+# class UserUpdateRequest(BaseModel):
+#     class_id: int
+#     period: int
+#     ef_item_id_1: int
+#     ef_item_id_2: int
+#     ef_item_id_3: int
+#     ef_item_id_4: int
+#     ef_item_id_5: int
    
  
  
