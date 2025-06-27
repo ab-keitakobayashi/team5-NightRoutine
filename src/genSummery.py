@@ -4,11 +4,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
 from db_connect import get_db  # DBセッション取得関数
-from models import User, EfModel, ReviewsModel, ReportsModel, ef_items_data, reviews_aicomment_data, SummaryRequest
+from models import User, EfModel, ReviewsModel, ReportsModel, ef_items_data, reviews_aicomment_data,ScoresModel, SummaryRequest
 import boto3
 import json
 from typing import List
 import os
+from typing import List, Dict, Any
+from pydantic import BaseModel
 
 Base = declarative_base()
 app = FastAPI()
@@ -18,40 +20,11 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_REGION_NAME = os.getenv("AWS_REGION_NAME")
 
-# # --- SQLAlchemy Models ---
-# class EfModel(Base):
-#     __tablename__ = "ef_items"
-#     ef_item_id = Column(Integer, primary_key=True)
-#     ef_category_id = Column(Integer, nullable=False)
-#     class_id = Column(Integer, nullable=False)
-#     item = Column(String, nullable=False)
+    
 
-# class ReviewsModel(Base):
-#     __tablename__ = "reviews"
-#     review_id = Column(Integer, primary_key=True, index=True)
-#     report_id = Column(Integer, unique=True, nullable=True)
-#     successes = Column(String, nullable=False)
-#     failures = Column(String, nullable=False)
-#     ai_comment = Column(String, nullable=False)
-
-# class ReportsModel(Base):
-#     __tablename__ = "reports"
-#     report_id = Column(Integer, primary_key=True, index=True)
-#     user_id = Column(Integer, nullable=False)
-#     write_date = Column(Date, nullable=False)
-#     is_deleted = Column(Boolean, default=False)
-
-# # --- Pydantic Models ---
-# class SummaryRequest(BaseModel):
-#     start_date: str
-#     end_date: str
-
-# class ef_items_data(BaseModel):
-#     ef_item_id: int
-#     item: str
-
-# class reviews_aicomment_data(BaseModel):
-#     ai_comment: str
+class EfScoreSummary(BaseModel):
+    ef_item_id: int
+    total_score: int
 
 # --- Bedrock Function ---
 def post_efAssesment_from_bedrock(ef_input: List[ef_items_data], reviews_data: List[reviews_aicomment_data]) -> str:
@@ -140,4 +113,26 @@ def post_reviews_and_advice(user_id: str, request: SummaryRequest, db: Session =
     review_input_models = [reviews_aicomment_data(ai_comment=r.ai_comment) for r in reviews]
 
     assessment = post_efAssesment_from_bedrock(ef_input_models, review_input_models)
-    return {"assessment": assessment}
+
+    # --- ここからスコア集計 ---
+    # ScoresModelのimportが必要です
+    from models import ScoresModel
+
+    scores = db.query(ScoresModel).filter(ScoresModel.report_id.in_(report_ids)).all()
+    ef_summary: Dict[int, int] = {}
+    for s in scores:
+        if s.ef_item_id not in ef_summary:
+            ef_summary[s.ef_item_id] = 0
+        ef_summary[s.ef_item_id] += s.score
+
+    ef_score_summary = [
+        EfScoreSummary(
+            ef_item_id=ef_item_id,
+            total_score=total_score
+        )
+        for ef_item_id, total_score in ef_summary.items()
+    ]
+    return {
+        "assessment": assessment,
+        "ef_score_summary": [e.model_dump() for e in ef_score_summary]
+    }
