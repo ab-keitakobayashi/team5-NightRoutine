@@ -1,6 +1,6 @@
 from fastapi import FastAPI,APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from models import  EfModel,ReportResponse,ReportRegiResponse, Report, User, ReportsModel,tasksModel,ReviewsModel,Review # Userモデル
+from models import  EfModel,ReportResponse,ReportRegiResponse, Report, User, ReportsModel,tasksModel,ReviewsModel,Review, ScoresModel # Userモデル
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime,ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -59,7 +59,7 @@ app.add_middleware(
 #     assessments_points: dict  # レポートの詳細データ
 #     assessment: str
 #     tasks: List[str]  # タスクの説明
-#     # user_id: int
+#     # user_id: str
 #     # report_id: int
 #     # start_time: List[str]
 #     # # endTime: List[str]
@@ -103,7 +103,7 @@ app.add_middleware(
 
 
 # bedrock生成文を取得
-def get_assessment_url(user_id: int, payload: dict = None) -> dict:
+def get_assessment_url(user_id: str, payload: dict = None) -> dict:
     """
     指定したユーザーIDに対して、JSON形式のデータをPOSTし、評価情報を取得します。
     payload: dict型で渡すデータ（例: {"key": "value"}）
@@ -147,7 +147,7 @@ def replace_ef_id_with_item(assessments_points, db_session):
 
 # # ④itemを追加（サンプル実装済み）
 @app.post("/report/{user_id}/{day}/regi")#, response_model=ReportResponse)
-def registor_report(user_id: int, day: datetime, 
+def registor_report(user_id: str, day: datetime, 
                     report: Report, db_session: Session = Depends(get_db)): 
     reportdata = {
             "start_time": report.start_time,
@@ -157,8 +157,8 @@ def registor_report(user_id: int, day: datetime,
         }
     
     output_assessments = get_assessment_url(user_id, reportdata)
-    assessments_points = generate_assessments_points(output_assessments)
-    assessments_points = replace_ef_id_with_item(assessments_points, db_session)
+    # assessments_points = generate_assessments_points(output_assessments)
+    # assessments_points = replace_ef_id_with_item(assessments_points, db_session)
 
     db_repo = ReportsModel(user_id = user_id, 
                            write_date = day, 
@@ -185,12 +185,33 @@ def registor_report(user_id: int, day: datetime,
                            report_id = db_repo.report_id,
                            successes = report.successes, 
                            failures = report.failures,
-                           ai_comment = "AIのコメント")
+                           ai_comment = output_assessments["assessment"]) #AIのコメント
     
     db_session.add(db_review)
     db_session.commit()
     db_session.refresh(db_review)
     print("db_review", db_review)
+
+    # スコアの登録
+    # ef_plus_points
+    for ef_id in output_assessments.get('ef_plus_points', []):
+        db_score = ScoresModel(
+            score=1,
+            ef_item_id=ef_id,
+            report_id=db_repo.report_id
+        )
+        db_session.add(db_score)
+        db_session.commit()
+    # ef_minus_points
+    for ef_id in output_assessments.get('ef_minus_points', []):
+        db_score = ScoresModel(
+            score=-1,
+            ef_item_id=ef_id,
+            report_id=db_repo.report_id
+        )
+        db_session.add(db_score)
+        db_session.commit()
+
     return ReportRegiResponse(
             start_time=report.start_time,
             successes=report.successes,
@@ -200,8 +221,8 @@ def registor_report(user_id: int, day: datetime,
     
 #レビューを更新
 @app.put("/report/regi/{user_id}/{day}/update")
-def update_report(user_id: int, day: datetime, report: Report, db: Session = Depends(get_db)):
-    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).all()
+def update_report(user_id: str, day: datetime, report: Report, db: Session = Depends(get_db)):
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day, ReportsModel.is_deleted == 0).all()
     
     if not db_repo:
         print("db_repo not found")
@@ -210,6 +231,14 @@ def update_report(user_id: int, day: datetime, report: Report, db: Session = Dep
     db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
     if not db_tasks:
         raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+
+    reportdata = {
+            "start_time": report.start_time,
+            "task_description": report.tasks,
+            "success": report.successes,
+            "failure": report.failures
+        }
+    output_assessments = get_assessment_url(user_id, reportdata)
 
     db_tasks.start_time = report.start_time
     db_tasks.task_description = report.tasks
@@ -222,15 +251,41 @@ def update_report(user_id: int, day: datetime, report: Report, db: Session = Dep
 
     db_review.successes = report.successes
     db_review.failures = report.failures
-    db_review.ai_comment = "AIのコメント(updated)"
+    db_review.ai_comment = output_assessments["assessment"]
     db.commit()
     db.refresh(db_review)
+
+    # スコアの更新
+    # ef_plus_points
+    # 既存のレビューを削除
+    db_scores = db.query(ScoresModel).filter(ScoresModel.report_id == db_repo.report_id).all()
+    for score in db_scores:
+        db.delete(score)
+    db.commit()
+
+    for ef_id in output_assessments.get('ef_plus_points', []):
+        db_score = ScoresModel(
+            score=1,
+            ef_item_id=ef_id,
+            report_id=db_repo.report_id
+        )
+        db.add(db_score)
+        db.commit()
+    # ef_minus_points
+    for ef_id in output_assessments.get('ef_minus_points', []):
+        db_score = ScoresModel(
+            score=-1,
+            ef_item_id=ef_id,
+            report_id=db_repo.report_id
+        )
+        db.add(db_score)
+        db.commit()
 
     return db_review
 
 #レビューを削除
 @app.patch("/report/regi/{user_id}/{day}/delete")
-def update_report(user_id: int, day: datetime, db: Session = Depends(get_db)):
+def update_report(user_id: str, day: datetime, db: Session = Depends(get_db)):
     db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).all()
     
     if not db_repo:
@@ -244,51 +299,76 @@ def update_report(user_id: int, day: datetime, db: Session = Depends(get_db)):
 
 #レビューを取得
 @app.post("/report/{user_id}/{day}/get")
-def get_report(user_id: int, day: datetime,  db: Session = Depends(get_db)):
+def get_report(user_id: str, day: datetime,  db: Session = Depends(get_db)):
     print("now finding")
-    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).first()
+    # assessmentの生成
+    assessment = {
+        'ef_plus_points': [],
+        'ef_minus_points': [],
+        'assessment': ""
+    }
+
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day, ReportsModel.is_deleted == 0).first()
     print("now finded")
     print(db_repo.report_id)
 
     if not db_repo:
         print("db_repo not found")
-        raise HTTPException(status_code=404, detail="Report not found")
+        db_repo = ReportsModel(
+            report_id = -1, 
+            write_date= "", 
+            is_deleted= 0)
+        # raise HTTPException(status_code=404, detail="Report not found")
 
     db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
     print("db_tasks", db_tasks)
     if not db_tasks:
-        raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+        db_tasks = tasksModel(
+            report_id = -1,
+            start_time = [],
+            task_description = []
+        )
+        
+        #raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
 
 
     db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
     if not db_review:
-        raise HTTPException(status_code=404, detail="Review not found")
+        #raise HTTPException(status_code=404, detail="Review not found")
+        db_review = ReviewsModel(
+            report_id= -1,
+            successes="",
+            failures="",
+            ai_comment=""
+        )
+    
+    db_scores = db.query(ScoresModel).filter(ScoresModel.report_id == db_repo.report_id).all()
+    
+    for score in db_scores:
+        if score.score > 0:
+            assessment['ef_plus_points'].append(score.ef_item_id)
+        elif score.score < 0:
+            assessment['ef_minus_points'].append(score.ef_item_id)
 
     start_times = [task.start_time for task in db_tasks]
     print(start_times)
     print(db_review.successes)
     print(db_review.failures)
-
+    
+    assessment['assessment'] = db_review.ai_comment if db_review.ai_comment else "AIのコメントはまだありません"
+    
     return ReportResponse(
             start_time=start_times,
             successes=db_review.successes,
             failures=db_review.failures,
             tasks=[task.task_description for task in db_tasks],
-            assessments = {
-                "items": [
-                    { "EF_item": "自己管理", "score": 10, "total_score": 10 },
-                    { "EF_item": "注意力", "score": -10, "total_score": 8 },
-                    { "EF_item": "感情制御", "score": -10, "total_score": 9 },
-                    { "EF_item": "計画性", "score": 10, "total_score": 7 },
-                    { "EF_item": "柔軟性", "score": 10, "total_score": 12 },
-                ],
-                "assessment":
-                    "本日の業務は全体的に良好でしたが、注意力に関しては改善の余地があります。特に、タスクの切り替え時に集中力を欠くことがありました。次回は、タスクごとに短い休憩を挟むことで、注意力を高めることをお勧めします。",
-            })
+            assessment=assessment
+
+            )
     
 #レビューを一時保存
 @app.post("/report/{user_id}/{day}/save")
-def save_report(user_id: int, day: datetime, report: Report, db_session: Session = Depends(get_db)):
+def save_report(user_id: str, day: datetime, report: Report, db_session: Session = Depends(get_db)):
     db_repo = db_session.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).all()
 
     if not db_repo:
