@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 @app.get("/user/{user_id}", response_model=UserResiResponse)
-def get_user(user_id: int, db_session: Session = Depends(get_db)):
+def get_user(user_id: str, db_session: Session = Depends(get_db)):
     """
     ユーザー情報を取得するエンドポイント
     :param user_id: ユーザーID

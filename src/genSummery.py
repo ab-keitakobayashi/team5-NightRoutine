@@ -91,7 +91,7 @@ def post_efAssesment_from_bedrock(ef_input: List[ef_items_data], reviews_data: L
 
 # --- FastAPI Endpoint ---
 @app.post("/user/{user_id}/reviews/")
-def post_reviews_and_advice(user_id: int, request: SummaryRequest, db: Session = Depends(get_db)):
+def post_reviews_and_advice(user_id: str, request: SummaryRequest, db: Session = Depends(get_db)):
     report_ids = db.query(ReportsModel.report_id).filter(
         and_(
             ReportsModel.user_id == user_id,

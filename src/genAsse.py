@@ -50,7 +50,7 @@ Base = declarative_base()
 class ReportsModel(Base):
     __tablename__ = "reports"
 
-    user_id = Column(Integer, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
+    user_id = Column(String, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
     report_id = Column(Integer, primary_key=True, index=False)
     write_date = Column(DateTime, default=datetime, nullable=False)
     is_deleted = Column(Boolean, default=0, nullable=False)  # 0: 未削除, 1: 削除済み  
@@ -97,7 +97,7 @@ class GenAsseResponse(BaseModel):
 app = FastAPI()
 
  # 3. EFModelの内容を取得（ユーザーが選択した5つ＋職位に紐づく残り2つ）
-def get_ef_items(db, user_id: int):
+def get_ef_items(db, user_id: str):
 # ユーザー情報を取得
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
@@ -229,7 +229,7 @@ def get_efAssement_from_bedrock(ef_items_all: list[EfModel], start_times: list[s
 
 @app.post("/user/{user_id}/assessment", response_model=GenAsseResponse)
 def genasssessment(
-    user_id: int,
+    user_id: str,
     request: GenAssessmentRequest,
     db_session: Session = Depends(get_db)
 ):
