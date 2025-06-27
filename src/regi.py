@@ -42,7 +42,7 @@ app.add_middleware(
 def create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
     db_user = User(
         user_name=user.name,
-        user_mailAddress= "dammy3@Gmail.com",
+        user_mailAddress= "dammy555@Gmail.com",
         class_id=user.class_id,
         period=user.period,
         avatar_id=1,

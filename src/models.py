@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from typing import List
+from typing import Optional
 # """
 # DB接続設定とモデル定義
 # """
@@ -22,7 +23,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "testusers"
 
-    user_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, primary_key=True, index=True)
     user_name = Column(String, nullable=False)
     user_mailAddress = Column(String, unique=True, nullable=False)
     class_id = Column(Integer, nullable=False)
@@ -98,7 +99,7 @@ class ReviewsModel(Base):
 class ReportsModel(Base):
     __tablename__ = "reports"
 
-    user_id = Column(Integer, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
+    user_id = Column(String, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
     report_id = Column(Integer, primary_key=True, index=False)
     write_date = Column(DateTime, default=datetime, nullable=False)
     is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み   
@@ -136,11 +137,11 @@ class UserResiResponse(BaseModel):
     avatar_id: int
     enemy_id: int
     enemy_hp: int
-    ef_item_id_1: int
-    ef_item_id_2: int
-    ef_item_id_3: int
-    ef_item_id_4: int
-    ef_item_id_5: int
+    ef_item_id_1: Optional[int]
+    ef_item_id_2: Optional[int]
+    ef_item_id_3: Optional[int]
+    ef_item_id_4: Optional[int]
+    ef_item_id_5: Optional[int]
 
  
  
@@ -182,3 +183,19 @@ class GenAsseResponse(BaseModel):
     ef_minus_points: list[int]  # マイナスEF項目のIDのリスト
     assessment: str  # AIからのアドバイス
    
+
+# --- SQLAlchemy Models ---
+
+
+
+# --- Pydantic Models ---
+class SummaryRequest(BaseModel):
+    start_date: datetime
+    end_date: datetime
+
+class ef_items_data(BaseModel):
+    ef_item_id: int
+    item: str
+
+class reviews_aicomment_data(BaseModel):
+    ai_comment: str

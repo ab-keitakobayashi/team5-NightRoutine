@@ -4,56 +4,62 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
 from db_connect import get_db  # DBセッション取得関数
-from models import User
+from models import User, EfModel, ReviewsModel, ReportsModel, ef_items_data, reviews_aicomment_data, SummaryRequest
 import boto3
 import json
 from typing import List
+import os
 
 Base = declarative_base()
 app = FastAPI()
 
-# --- SQLAlchemy Models ---
-class EfModel(Base):
-    __tablename__ = "ef_items"
-    ef_item_id = Column(Integer, primary_key=True)
-    ef_category_id = Column(Integer, nullable=False)
-    class_id = Column(Integer, nullable=False)
-    item = Column(String, nullable=False)
+# 環境変数からAWS情報を取得
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_REGION_NAME = os.getenv("AWS_REGION_NAME")
 
-class ReviewsModel(Base):
-    __tablename__ = "reviews"
-    review_id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer, unique=True, nullable=True)
-    successes = Column(String, nullable=False)
-    failures = Column(String, nullable=False)
-    ai_comment = Column(String, nullable=False)
+# # --- SQLAlchemy Models ---
+# class EfModel(Base):
+#     __tablename__ = "ef_items"
+#     ef_item_id = Column(Integer, primary_key=True)
+#     ef_category_id = Column(Integer, nullable=False)
+#     class_id = Column(Integer, nullable=False)
+#     item = Column(String, nullable=False)
 
-class ReportsModel(Base):
-    __tablename__ = "reports"
-    report_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, nullable=False)
-    write_date = Column(Date, nullable=False)
-    is_deleted = Column(Boolean, default=False)
+# class ReviewsModel(Base):
+#     __tablename__ = "reviews"
+#     review_id = Column(Integer, primary_key=True, index=True)
+#     report_id = Column(Integer, unique=True, nullable=True)
+#     successes = Column(String, nullable=False)
+#     failures = Column(String, nullable=False)
+#     ai_comment = Column(String, nullable=False)
 
-# --- Pydantic Models ---
-class SummaryRequest(BaseModel):
-    start_date: str
-    end_date: str
+# class ReportsModel(Base):
+#     __tablename__ = "reports"
+#     report_id = Column(Integer, primary_key=True, index=True)
+#     user_id = Column(Integer, nullable=False)
+#     write_date = Column(Date, nullable=False)
+#     is_deleted = Column(Boolean, default=False)
 
-class ef_items_data(BaseModel):
-    ef_item_id: int
-    item: str
+# # --- Pydantic Models ---
+# class SummaryRequest(BaseModel):
+#     start_date: str
+#     end_date: str
 
-class reviews_aicomment_data(BaseModel):
-    ai_comment: str
+# class ef_items_data(BaseModel):
+#     ef_item_id: int
+#     item: str
+
+# class reviews_aicomment_data(BaseModel):
+#     ai_comment: str
 
 # --- Bedrock Function ---
 def post_efAssesment_from_bedrock(ef_input: List[ef_items_data], reviews_data: List[reviews_aicomment_data]) -> str:
     client = boto3.client(
         'bedrock-runtime',
-         aws_access_key_id="", # Bedrockアクセス用のユーザー「bedrock_access」のアクセスキー
-        aws_secret_access_key="", # Bedrockアクセス用のユーザー「bedrock_access」のシークレットキー
-        region_name="us-east-1"  # Bedrockのリージョン
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        region_name=AWS_REGION_NAME  # Bedrockのリージョン
     )
 
     prompt = (

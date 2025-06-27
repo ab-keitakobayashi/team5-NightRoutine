@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 
-from models import  ReportResponse, Report, User, ReportsModel,tasksModel,ReviewsModel,Review,GenAsseResponse,GenAssessmentRequest,UserResiResponse, UserResiRequest, UserUpdateRequest
+from models import  ReportResponse, Report, User, ReportsModel,tasksModel,ReviewsModel,Review,GenAsseResponse,GenAssessmentRequest,UserResiResponse, UserResiRequest, UserUpdateRequest, SummaryRequest
 from reports_regi import registor_report,update_report, get_report, save_report
 from genAsse import genasssessment
 from regi import create_item
 from renew import update_user_profile
+from genSummery import post_reviews_and_advice
 from fastapi import Depends, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
@@ -62,3 +63,7 @@ def Create_item(user: UserResiRequest, db_session: Session = Depends(get_db)):
 @app.put("/user/update/{user_id}", response_model=dict)
 def Update_user_profile(user_id: int, request: UserUpdateRequest, db: Session = Depends(get_db)):
     return update_user_profile(user_id, request, db)
+
+@app.post("/user/{user_id}/reviews/")
+def Post_reviews_and_advice(user_id: int, request: SummaryRequest, db: Session = Depends(get_db)):
+    return post_reviews_and_advice(user_id, request, db)
