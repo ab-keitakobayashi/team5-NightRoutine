@@ -209,3 +209,32 @@ class ef_items_data(BaseModel):
 
 class reviews_aicomment_data(BaseModel):
     ai_comment: str
+    
+class EfAssessmentSummary(BaseModel):
+    ef_item_id: int
+    total_score: int
+    
+class EfScoreSummary(BaseModel):
+    ef_item_id: int
+    total_score: int
+    dates: List[str]
+    
+class EfItemsModel(Base):
+    __tablename__ = "ef_items"
+
+    ef_item_id = Column(Integer, primary_key=True, index=True)
+    item = Column(String, nullable=False)
+    ef_category_id = Column(Integer, nullable=False)
+
+
+class EfCategoriesModel(Base):
+    __tablename__ = "ef_categories"
+
+    ef_category_id = Column(Integer, primary_key=True, index=True)
+    category_name = Column(String, nullable=False)
+    parent_category_id = Column(Integer, nullable=True)
+
+class EfCategoryResponse(BaseModel):
+    parentcategoryname: str
+    categoryname: str
+    item: str
