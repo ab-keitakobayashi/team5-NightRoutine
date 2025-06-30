@@ -220,17 +220,36 @@ def registor_report(user_id: str, day: datetime,
             )  
     
 #レビューを更新
-@app.put("/report/regi/{user_id}/{day}/update")
+@app.put("/report/{user_id}/{day}/update")
 def update_report(user_id: str, day: datetime, report: Report, db: Session = Depends(get_db)):
-    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day, ReportsModel.is_deleted == 0).all()
-    
+    db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day, ReportsModel.is_deleted == 0).first()
+    print("update中")
     if not db_repo:
         print("db_repo not found")
         raise HTTPException(status_code=404, detail="Report not found")
 
+    
     db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
+    for task in db_tasks:
+        db.delete(task)
+    db.commit()
+
     if not db_tasks:
         raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+
+
+    for i in range(min(len(report.start_time), len(report.tasks))):
+        start_time_item = report.start_time[i] if report.start_time else None
+        print("start_time_item", start_time_item)
+        task_description_item = report.tasks[i] if report.tasks else None
+        db_task = tasksModel(
+            report_id=db_repo.report_id,
+            start_time=start_time_item,
+            task_description=task_description_item
+        )
+        db.add(db_task)
+        db.commit()
+    
 
     reportdata = {
             "start_time": report.start_time,
@@ -239,13 +258,8 @@ def update_report(user_id: str, day: datetime, report: Report, db: Session = Dep
             "failure": report.failures
         }
     output_assessments = get_assessment_url(user_id, reportdata)
-
-    db_tasks.start_time = report.start_time
-    db_tasks.task_description = report.tasks
-    db.commit()
-    db.refresh(db_tasks)
-
-    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).all()
+    
+    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
     if not db_review:
         raise HTTPException(status_code=404, detail="Review not found")
 
@@ -285,7 +299,7 @@ def update_report(user_id: str, day: datetime, report: Report, db: Session = Dep
 
 #レビューを削除
 @app.patch("/report/regi/{user_id}/{day}/delete")
-def update_report(user_id: str, day: datetime, db: Session = Depends(get_db)):
+def delete_report(user_id: str, day: datetime, db: Session = Depends(get_db)):
     db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day).all()
     
     if not db_repo:

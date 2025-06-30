@@ -31,7 +31,7 @@ def Report_regi(user_id: str, day: datetime, report: Report, db_session: Session
     return registor_report(user_id, day, report, db_session)
 
 #レビューを更新
-@app.put("/report/regi/{user_id}/{day}/update")
+@app.put("/report/{user_id}/{day}/update")
 def Update_report(user_id: str, day: datetime, report: Report, db: Session = Depends(get_db)):
     return update_report(user_id, day, report, db)
 
