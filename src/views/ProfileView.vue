@@ -1,5 +1,16 @@
 <template>
   <v-alert
+    v-if="
+      showFirstAlert && (!user_name || user_name === '' || user_name === null)
+    "
+    type="info"
+    color="blue"
+    variant="elevated"
+    class="mb-4"
+  >
+    最初にプロフィールを登録してください。
+  </v-alert>
+  <v-alert
     v-if="errorMessage"
     type="error"
     color="red"
@@ -181,7 +192,9 @@ const items = [
     value: 10,
   },
 ];
-import { ref } from "vue";
+
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import axios from "axios";
 
 const user_name = ref("");
@@ -192,7 +205,21 @@ const user_goal_setting_period = ref();
 // 選択されたEFのIDを格納する
 const ef_item_ids = ref([]);
 
+const route = useRoute();
 const errorMessage = ref("");
+const showFirstAlert = ref(false);
+
+onMounted(() => {
+  if (
+    route.query.first &&
+    (!user_name.value || user_name.value === "" || user_name.value === null)
+  ) {
+    showFirstAlert.value = true;
+    setTimeout(() => {
+      showFirstAlert.value = false;
+    }, 5000); // 5秒で自動非表示
+  }
+});
 
 async function save_profile() {
   errorMessage.value = "";
@@ -221,17 +248,28 @@ async function save_profile() {
     ef_item_ids.value
   );
 
-
-  const ef_item_id_array = Array.isArray(ef_item_ids.value) ? [...ef_item_ids.value] : [];
-  const response = await axios.post(
-    `http://127.0.0.1:8000/user/regi`,
-    {
-      name: user_name.value,
-      class_id: user_class_id.value,
-      period: user_goal_setting_period.value,
-      ef_item_id_array: ef_item_id_array,
-    }
-  )
+  const userID = localStorage.getItem("user_id");
+  if (!userID) {
+    errorMessage.value = "ユーザーIDが取得できません。再ログインしてください。";
+    return;
+  }
+  const ef_item_id_array = Array.isArray(ef_item_ids.value)
+    ? [...ef_item_ids.value]
+    : [];
+  const body = {
+    user_name: user_name.value,
+    class_id: user_class_id.value,
+    period: user_goal_setting_period.value,
+    ef_item_id_1: ef_item_id_array[0],
+    ef_item_id_2: ef_item_id_array[1],
+    ef_item_id_3: ef_item_id_array[2],
+    ef_item_id_4: ef_item_id_array[3],
+    ef_item_id_5: ef_item_id_array[4],
+  };
+  const response = await axios.put(
+    `http://127.0.0.1:8000/user/update/${userID}`,
+    body
+  );
   console.log(response);
   if (response.status === 200) {
     alert("プロフィールが保存されました。");

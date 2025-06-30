@@ -52,10 +52,11 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 
-const userID = ref(1); // ユーザーIDのダミー値
+const userID = ref<String | null>(null); // localStorageから取得
 const user_name = ref("");
 
 onMounted(async () => {
+  userID.value = String(localStorage.getItem("user_id"));
   try {
     const res = await axios.get(`http://127.0.0.1:8000/user/${userID.value}`);
     user_name.value = res.data.name; // APIのレスポンスに合わせてプロパティ名を指定

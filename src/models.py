@@ -111,8 +111,9 @@ class ReportsModel(Base):
 # Post
 
 
- 
+  
 class UserUpdateRequest(BaseModel):
+    user_name: str
     class_id: int
     period: int
     ef_item_id_1: int

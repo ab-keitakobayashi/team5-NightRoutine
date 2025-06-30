@@ -328,6 +328,7 @@ def get_report(user_id: str, day: datetime,  db: Session = Depends(get_db)):
 
     if db_repo:
         print("db_repo not found")
+
         db_repo = ReportsModel(
             report_id = -1, 
             write_date= "", 
