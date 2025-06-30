@@ -34,14 +34,29 @@ class EfScoreSummary(BaseModel):
 app = FastAPI()
 @app.get("/user/{user_id}/ef_scores", response_model=List[EfScoreSummary])
 def get_ef_score_summary(user_id: str, db: Session = Depends(get_db)):
+    # ユーザー情報取得
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    # ユーザーが登録したEF（nullを除外）
+    user_ef_ids = [
+        user.ef_item_id_1, user.ef_item_id_2, user.ef_item_id_3,
+        user.ef_item_id_4, user.ef_item_id_5
+    ]
+    user_ef_ids = [eid for eid in user_ef_ids if eid is not None]
+
+    # 全EF項目（1～7）を取得
+    all_ef_ids = list(range(1, 8))
+
+    # ユーザーが選択していないEFはクラスのEFとして扱う
+    missing_ef_ids = [eid for eid in all_ef_ids if eid not in user_ef_ids]
+
     # 削除されていないレポートを取得
     reports = db.query(ReportsModel).filter(
         ReportsModel.user_id == user_id,
         ReportsModel.is_deleted == False
     ).all()
-    if not reports:
-        raise HTTPException(status_code=404, detail="No reports found for this user.")
-
     report_id_to_date = {r.report_id: r.write_date.strftime("%Y-%m-%d") for r in reports}
     report_ids = list(report_id_to_date.keys())
 
@@ -55,13 +70,20 @@ def get_ef_score_summary(user_id: str, db: Session = Depends(get_db)):
         ef_summary[s.ef_item_id]["total_score"] += s.score
         ef_summary[s.ef_item_id]["dates"].append(report_id_to_date[s.report_id])
 
-    # 整形して返却
-    result = [
-        EfScoreSummary(
-            ef_item_id=ef_item_id,
-            total_score=data["total_score"],
-            dates=data["dates"]
-        )
-        for ef_item_id, data in ef_summary.items()
-    ]
+    # 返却用リストを作成（ユーザーEF＋未選択EF＝全7項目）
+    result = []
+    for ef_id in user_ef_ids + missing_ef_ids:
+        if ef_id in ef_summary:
+            data = ef_summary[ef_id]
+            result.append(EfScoreSummary(
+                ef_item_id=ef_id,
+                total_score=data["total_score"],
+                dates=data["dates"]
+            ))
+        else:
+            result.append(EfScoreSummary(
+                ef_item_id=ef_id,
+                total_score=0,
+                dates=[]
+            ))
     return result
