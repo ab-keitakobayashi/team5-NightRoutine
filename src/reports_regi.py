@@ -230,6 +230,7 @@ def update_report(user_id: str, day: datetime, report: Report, db: Session = Dep
 
     
     db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
+    print("db_tasks will delete", db_tasks)
     for task in db_tasks:
         db.delete(task)
     db.commit()
@@ -324,9 +325,8 @@ def get_report(user_id: str, day: datetime,  db: Session = Depends(get_db)):
 
     db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day, ReportsModel.is_deleted == 0).first()
     print("now finded")
-    print(db_repo.report_id)
 
-    if not db_repo:
+    if db_repo:
         print("db_repo not found")
         db_repo = ReportsModel(
             report_id = -1, 
@@ -334,44 +334,44 @@ def get_report(user_id: str, day: datetime,  db: Session = Depends(get_db)):
             is_deleted= 0)
         # raise HTTPException(status_code=404, detail="Report not found")
 
-    db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
-    print("db_tasks", db_tasks)
-    if not db_tasks:
-        db_tasks = tasksModel(
-            report_id = -1,
-            start_time = [],
-            task_description = []
-        )
+        db_tasks = db.query(tasksModel).filter(tasksModel.report_id == db_repo.report_id).all()
+        print("db_tasks", db_tasks)
+        if  db_tasks == []:
+            db_tasks = tasksModel(
+                report_id = -1,
+                start_time = "",
+                task_description = ""
+            )
+            
+            #raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
+
+
+        db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
+        if not db_review:
+            #raise HTTPException(status_code=404, detail="Review not found")
+            db_review = ReviewsModel(
+                report_id= -1,
+                successes="",
+                failures="",
+                ai_comment=""
+            )
         
-        #raise HTTPException(status_code=404, detail=f"{db_repo.report_id}Tasks not found")
-
-
-    db_review = db.query(ReviewsModel).filter(ReviewsModel.report_id == db_repo.report_id).first()
-    if not db_review:
-        #raise HTTPException(status_code=404, detail="Review not found")
-        db_review = ReviewsModel(
-            report_id= -1,
-            successes="",
-            failures="",
-            ai_comment=""
-        )
-    
-    db_scores = db.query(ScoresModel).filter(ScoresModel.report_id == db_repo.report_id).all()
-    
-    for score in db_scores:
-        if score.score > 0:
-            assessment['ef_plus_points'].append(score.ef_item_id)
-        elif score.score < 0:
-            assessment['ef_minus_points'].append(score.ef_item_id)
-
-    start_times = [task.start_time for task in db_tasks]
-    print(start_times)
-    print(db_review.successes)
-    print(db_review.failures)
-    
-    assessment['assessment'] = db_review.ai_comment if db_review.ai_comment else "AIのコメントはまだありません"
-    
-    return ReportResponse(
+        db_scores = db.query(ScoresModel).filter(ScoresModel.report_id == db_repo.report_id).all()
+        
+        for score in db_scores:
+            if score.score > 0:
+                assessment['ef_plus_points'].append(score.ef_item_id)
+            elif score.score < 0:
+                assessment['ef_minus_points'].append(score.ef_item_id)
+        print("db_tasks---------",db_tasks)
+        start_times = [task.start_time for task in db_tasks] if db_tasks else []
+        print(start_times)
+        print(db_review.successes)
+        print(db_review.failures)
+        
+        assessment['assessment'] = db_review.ai_comment if db_review.ai_comment else "AIのコメントはまだありません"
+        
+        returnreport = ReportResponse(
             start_time=start_times,
             successes=db_review.successes,
             failures=db_review.failures,
@@ -379,6 +379,15 @@ def get_report(user_id: str, day: datetime,  db: Session = Depends(get_db)):
             assessment=assessment
 
             )
+    else: returnreport =  ReportResponse(
+            start_time=[],
+            successes="",
+            failures="",
+            tasks=[],
+            assessment={"ef_plus_points": [], "ef_minus_points": [], "assessment": ""} 
+            )
+    
+    return returnreport
     
 #レビューを一時保存
 @app.post("/report/{user_id}/{day}/save")
