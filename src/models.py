@@ -16,10 +16,11 @@ from typing import Optional
 Base = declarative_base()
 
 
-# モデル定義
+# DBモデル定義
 # データベースのテーブルを定義するためのモデルクラスを作成します。
 
-
+# Userモデル
+# ユーザーテーブルを定義します。
 class User(Base):
     __tablename__ = "testusers"
 
@@ -37,6 +38,103 @@ class User(Base):
     ef_item_id_4 = Column(Integer, nullable=False)
     ef_item_id_5 = Column(Integer, nullable=False)
 
+# Tasksモデル
+# タスクテーブルを定義します。
+class TasksModel(Base):
+    __tablename__ = "tasks"
+
+    task_id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer,  unique= True,nullable=True)#ForeignKey('reports.report_id'))
+    start_time = Column(String, nullable=False)
+    task_description = Column(String, nullable=False)
+
+# class Ef_Items(Base):
+#     __tablename__ = "ef_items"
+
+#     ef_item_id = Column(Integer, primary_key=True, index=True)
+#     ef_category_id = Column(Integer, nullable=False)
+#     class_id = Column(Integer, nullable=False)
+#     item = Column(String, nullable=False)
+# Reviewsモデル
+# レビューのテーブルを定義します。
+class ReviewsModel(Base):
+    __tablename__ = "reviews"
+
+    review_id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, unique= True,nullable=True)#
+    successes = Column(String, nullable=False)
+    failures = Column(String, nullable=False)
+    ai_comment = Column(String, nullable=False)
+
+# Reportsモデル
+# レポートのテーブルを定義します。
+class ReportsModel(Base):
+    __tablename__ = "reports"
+
+    user_id = Column(String, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
+    report_id = Column(Integer, primary_key=True, index=False)
+    write_date = Column(DateTime, default=datetime, nullable=False)
+    is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み
+
+# Scoresモデル
+# スコアのテーブルを定義します。
+class ScoresModel(Base):
+    __tablename__ = "scores"
+    score_id = Column(Integer, primary_key=True, autoincrement=True)
+    score = Column(Integer, nullable=False)
+    ef_item_id = Column(Integer, nullable=False)
+    report_id = Column(Integer, nullable=False)
+
+ # EFモデル
+# EF項目のテーブルを定義します。
+class EfModel(Base):
+    __tablename__ = "ef_items" # テーブル名
+    ef_item_id = Column(Integer, primary_key=True) # 主キー
+    ef_category_id = Column(Integer, nullable=False) # カテゴリID
+    class_id = Column(Integer, nullable=False)
+    item = Column(String, nullable=False) # アイテム名
+    
+# EFカテゴリモデル
+# EF項目のカテゴリを定義します。
+class EfItemsModel(Base):
+    __tablename__ = "ef_items"
+
+    ef_item_id = Column(Integer, primary_key=True, index=True)
+    item = Column(String, nullable=False)
+    ef_category_id = Column(Integer, nullable=False)
+
+# EFカテゴリモデル
+# EF項目のカテゴリを定義します。
+class EfCategoriesModel(Base):
+    __tablename__ = "ef_categories"
+
+    ef_category_id = Column(Integer, primary_key=True, index=True)
+    category_name = Column(String, nullable=False)
+    parent_category_id = Column(Integer, nullable=True)
+
+
+# Pydanticモデル
+# データのバリデーションとシリアライズを行うためのモデル]
+
+# Post
+
+# UserRequestモデル
+class UserRequest(BaseModel):
+    user_name: str
+    user_mailAddress: str
+    class_id: int
+    period: int
+    avatar_id: int
+    enemy_id: int
+    enemy_hp: int
+    ef_item_id_1: int
+    ef_item_id_2: int
+    ef_item_id_3: int
+    ef_item_id_4: int
+    ef_item_id_5: int
+    
+# Reportモデル
+# レポートのデータを定義します。
 class Report(BaseModel):
     start_time: List[str]
     # endTime: List[str]
@@ -44,7 +142,8 @@ class Report(BaseModel):
     failures: str
     tasks: List[str] 
 
-
+# ReportResponseモデル
+# レポートのレスポンスデータを定義します。
 class ReportResponse(BaseModel):
     
     start_time: List[str]  # タスクの開始時間のリスト
@@ -53,6 +152,7 @@ class ReportResponse(BaseModel):
     tasks: List[str]  # タスクの説明
     assessment: dict
 
+# ReportRegiResponseモデル  
 class ReportRegiResponse(BaseModel):
     
     start_time: List[str]  # タスクの開始時間のリスト
@@ -71,47 +171,8 @@ class ReportRegiResponse(BaseModel):
     # failures : str
     # tasks: List[str]
 
-class tasksModel(Base):
-    __tablename__ = "tasks"
-
-    task_id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer,  unique= True,nullable=True)#ForeignKey('reports.report_id'))
-    start_time = Column(String, nullable=False)
-    task_description = Column(String, nullable=False)
-
-# class Ef_Items(Base):
-#     __tablename__ = "ef_items"
-
-#     ef_item_id = Column(Integer, primary_key=True, index=True)
-#     ef_category_id = Column(Integer, nullable=False)
-#     class_id = Column(Integer, nullable=False)
-#     item = Column(String, nullable=False)
-
-class ReviewsModel(Base):
-    __tablename__ = "reviews"
-
-    review_id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer, unique= True,nullable=True)#
-    successes = Column(String, nullable=False)
-    failures = Column(String, nullable=False)
-    ai_comment = Column(String, nullable=False)
-
-
-class ReportsModel(Base):
-    __tablename__ = "reports"
-
-    user_id = Column(String, unique= True,nullable=True)#ForeignKey('testusers.user_id'))
-    report_id = Column(Integer, primary_key=True, index=False)
-    write_date = Column(DateTime, default=datetime, nullable=False)
-    is_deleted = Column(Integer, default=0, nullable=False)  # 0: 未削除, 1: 削除済み   
-
-# Pydanticモデル
-# データのバリデーションとシリアライズを行うためのモデル]
-
-# Post
-
-
-  
+# UserUpdateRequestモデル
+# ユーザープロフィールの更新リクエストデータを定義
 class UserUpdateRequest(BaseModel):
     user_name: str
     class_id: int
@@ -123,14 +184,16 @@ class UserUpdateRequest(BaseModel):
     ef_item_id_5: int
 
 
-
+# UserResiRequestモデル
+# ユーザー登録リクエストデータを定義します。
 class UserResiRequest(BaseModel):
     name: str
     class_id: int
     period: int
     ef_item_id_array: list[int]  # Changed to a list for flexibility
 
-
+# UserResiResponseモデル
+# ユーザー登録レスポンスデータを定義します。
 class UserResiResponse(BaseModel):
     user_id: str
     name: str
@@ -147,65 +210,82 @@ class UserResiResponse(BaseModel):
 
 
 
-class ScoresModel(Base):
-    __tablename__ = "scores"
-    score_id = Column(Integer, primary_key=True, autoincrement=True)
-    score = Column(Integer, nullable=False)
-    ef_item_id = Column(Integer, nullable=False)
-    report_id = Column(Integer, nullable=False)
 
- 
-class EfModel(Base):
-    __tablename__ = "ef_items" # テーブル名
-    ef_item_id = Column(Integer, primary_key=True) # 主キー
-    ef_category_id = Column(Integer, nullable=False) # カテゴリID
-    class_id = Column(Integer, nullable=False)
-    item = Column(String, nullable=False) # アイテム名
- 
-#pythonモデル
+# EF_Itemsモデル
+# EF項目のデータを定義します。
 class Ef_Items(BaseModel):
     ef_item_id: int
     ef_category_id: int
     class_id: int
     item: str
  
+# Tasksモデル
+# タスクのデータを定義します。
 class Tasks(BaseModel):
     task_id: int
     report_id: int
     start_time: str
     task_description: str
  
+ 
+# Reviewsモデル
+# レビューのデータを定義します。
 class Review(BaseModel):
     review_id: int
     report_id: int
     successes: str
     failures: str
     ai_comment: str
- 
+
+#GenAssessmentRequestモデル
+# AIによるEF評価リクエストデータを定義します。
 class GenAssessmentRequest(BaseModel):
     start_time: list[str]
     task_description: list[str]
     success: str
     failure: str
-# レスポンスモデル
+    
+# GenAsseResponseモデル
+# AIによるEF評価レスポンスデータを定義します。
 class GenAsseResponse(BaseModel):
     ef_plus_points: list[int]  # EF項目のIDのリスト
     ef_minus_points: list[int]  # マイナスEF項目のIDのリスト
     assessment: str  # AIからのアドバイス
    
-
-# --- SQLAlchemy Models ---
-
-
-
-# --- Pydantic Models ---
+# SummaryRequestモデル
+# レビューとアドバイスの集計リクエストデータを定
 class SummaryRequest(BaseModel):
     start_date: datetime
     end_date: datetime
 
+# EF_Itemsデータモデル
+# EF項目のデータを定義します。
 class ef_items_data(BaseModel):
     ef_item_id: int
     item: str
 
+# ReviewsAICommentデータモデル
+# レビューのAIコメントデータを定義します。
 class reviews_aicomment_data(BaseModel):
     ai_comment: str
+    
+# EFアセスメントサマリーモデル
+# EF項目ごとのアセスメントサマリーを定義します。
+class EfAssessmentSummary(BaseModel):
+    ef_item_id: int
+    total_score: int
+    
+# EFスコアサマリーモデル
+# EF項目ごとのスコアサマリーを定義します。
+class EfScoreSummary(BaseModel):
+    ef_item_id: int
+    total_score: int
+    dates: List[str]
+    
+
+# EFカテゴリレスポンスモデル
+# EFカテゴリのレスポンスデータを定義します。
+class EfCategoryResponse(BaseModel):
+    parentcategoryname: str
+    categoryname: str
+    item: str

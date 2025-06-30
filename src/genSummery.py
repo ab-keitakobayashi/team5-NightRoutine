@@ -22,12 +22,12 @@ AWS_REGION_NAME = os.getenv("AWS_REGION_NAME")
 
     
 
-class EfScoreSummary(BaseModel):
+class EfAssessmentSummary(BaseModel):
     ef_item_id: int
     total_score: int
 
 # --- Bedrock Function ---
-def post_efAssesment_from_bedrock(ef_input: List[ef_items_data], reviews_data: List[reviews_aicomment_data]) -> str:
+def post_efAssessment_from_bedrock(ef_input: List[ef_items_data], reviews_data: List[reviews_aicomment_data]) -> str:
     client = boto3.client(
         'bedrock-runtime',
         aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -112,7 +112,7 @@ def post_reviews_and_advice(user_id: str, request: SummaryRequest, db: Session =
     ef_input_models = [ef_items_data(ef_item_id=e.ef_item_id, item=e.item) for e in ef_items]
     review_input_models = [reviews_aicomment_data(ai_comment=r.ai_comment) for r in reviews]
 
-    assessment = post_efAssesment_from_bedrock(ef_input_models, review_input_models)
+    assessment = post_efAssessment_from_bedrock(ef_input_models, review_input_models)
 
     # --- ここからスコア集計 ---
     # ScoresModelのimportが必要です
@@ -125,8 +125,8 @@ def post_reviews_and_advice(user_id: str, request: SummaryRequest, db: Session =
             ef_summary[s.ef_item_id] = 0
         ef_summary[s.ef_item_id] += s.score
 
-    ef_score_summary = [
-        EfScoreSummary(
+    ef_assessment_summary = [
+        EfAssessmentSummary(
             ef_item_id=ef_item_id,
             total_score=total_score
         )
@@ -134,5 +134,5 @@ def post_reviews_and_advice(user_id: str, request: SummaryRequest, db: Session =
     ]
     return {
         "assessment": assessment,
-        "ef_score_summary": [e.model_dump() for e in ef_score_summary]
+        "ef_assessment_summary": [e.model_dump() for e in ef_assessment_summary]
     }
