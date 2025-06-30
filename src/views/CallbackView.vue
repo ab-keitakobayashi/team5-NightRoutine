@@ -51,7 +51,24 @@ onMounted(async () => {
     localStorage.setItem("user_email", email);
     localStorage.setItem("user_id", userId);
 
-    router.push("/");
+    // ユーザー情報取得APIで分岐
+    try {
+      const userRes = await axios.get(`http://127.0.0.1:8000/user/${userId}`);
+      // user_nameが空文字・null・undefinedの場合はプロフィール未登録とみなす
+      const userName =
+        userRes.data && typeof userRes.data.name === "string"
+          ? userRes.data.name.trim()
+          : "";
+      if (userName) {
+        router.push("/");
+      } else {
+        router.push({ path: "/users", query: { first: 1 } });
+      }
+    } catch (e) {
+      // 404などで情報が返らなかった場合
+      router.push({ path: "/users", query: { first: 1 } });
+    }
+
     console.log("メールアドレス", email);
     console.log("ユーザーID", userId);
     console.log("ユーザー情報", userInfo);

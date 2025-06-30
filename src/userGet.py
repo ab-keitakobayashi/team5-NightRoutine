@@ -28,7 +28,7 @@ def get_user(user_id: str, db_session: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return UserResiResponse(
-        id=db_user.user_id,
+        user_id=db_user.user_id,
         name=db_user.user_name,
         mailAddress=db_user.user_mailAddress,
         class_id=db_user.class_id,

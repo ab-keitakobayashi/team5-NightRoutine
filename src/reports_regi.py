@@ -324,10 +324,10 @@ def get_report(user_id: str, day: datetime,  db: Session = Depends(get_db)):
 
     db_repo = db.query(ReportsModel).filter(ReportsModel.user_id == user_id, ReportsModel.write_date == day, ReportsModel.is_deleted == 0).first()
     print("now finded")
-    print(db_repo.report_id)
-
-    if not db_repo:
-        print("db_repo not found")
+    if db_repo:
+        print(db_repo.report_id)
+    else:
+        print("db_repo is None")
         db_repo = ReportsModel(
             report_id = -1, 
             write_date= "", 
