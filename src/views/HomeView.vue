@@ -255,8 +255,8 @@ async function re_submit() {
 
   console.log(check);
 
-  const response = await axios.post(
-    `http://127.0.0.1:8000/report/${userID.value}/${day.value}/regi`,
+  const response = await axios.put(
+    `http://127.0.0.1:8000/report/${userID.value}/${day.value}/update`,
     {
       start_time: timeSlots.value,
       successes: successes.value,
